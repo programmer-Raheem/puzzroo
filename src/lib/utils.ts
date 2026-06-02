@@ -94,6 +94,6 @@ export const imageDimensions = {
 } as const;
 
 // Helper function to get image with fallback
-export function getImage(key: keyof typeof images, fallback = images.placeholder): string {
+export function getImage(key: keyof typeof images, fallback = images.placeholder) {
   return images[key] || fallback;
 }
