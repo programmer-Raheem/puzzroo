@@ -21,7 +21,7 @@ export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControl
             <h2 className="font-urbanist font-bold text-[20px] leading-[120%] text-[#424242] dark:text-white transition-colors duration-300">
               About {name}
             </h2>
-            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-body)] dark:text-[var(--color-light)] transition-colors duration-300">
+            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] transition-colors duration-300">
               {about}
             </p>
           </div>
@@ -31,16 +31,16 @@ export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControl
             <h2 className="font-urbanist font-bold text-[20px] leading-[120%] text-[#424242] dark:text-white transition-colors duration-300">
               How To Play {name}
             </h2>
-            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-body)] dark:text-[var(--color-light)] transition-colors duration-300">
+            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] transition-colors duration-300">
               {howToPlay}
             </p>
 
             {/* Bullet Points Container */}
-            <div className="w-full max-w-[622px] rounded-[4px] bg-[var(--color-bg-tertiary)] dark:bg-[#1F222A] p-5 md:pr-5 md:pr-5 md:py-[20px] flex flex-col gap-3 transition-colors duration-300">
+            <div className="w-full max-w-[622px] rounded-[4px] bg-[#F5F5F5] dark:bg-[#1F222A] p-5 md:pr-5 md:pr-5 md:py-[20px] flex flex-col gap-3 transition-colors duration-300">
               {bulletPoints.map((point, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <span className="text-[#616161] dark:text-[var(--color-light)] flex-shrink-0">•</span>
-                  <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#616161] dark:text-[var(--color-light)] transition-colors duration-300">
+                  <span className="text-[#616161] dark:text-[#FAFAFA] flex-shrink-0">•</span>
+                  <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#616161] dark:text-[#FAFAFA] transition-colors duration-300">
                     {point}
                   </p>
                 </div>
@@ -53,7 +53,7 @@ export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControl
             <h2 className="font-urbanist font-bold text-[20px] leading-[120%] text-[#424242] dark:text-white transition-colors duration-300">
               Keyboard Controls
             </h2>
-            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-body)] dark:text-[var(--color-light)] transition-colors duration-300">
+            <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] transition-colors duration-300">
               {keyboardControls}
             </p>
           </div>
