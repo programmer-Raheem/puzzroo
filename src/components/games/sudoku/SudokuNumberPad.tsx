@@ -20,14 +20,14 @@ export function SudokuNumberPad({
 }: SudokuNumberPadProps) {
   if (mobile) {
     return (
-      <div className="flex justify-between items-center gap-[6px] w-full max-w-[350px] px-2">
+      <div className="flex justify-between items-center gap-[6px] w-full">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
             onClick={() => onNumberSelect(num)}
             className={`
-              w-[32px] h-[40px] rounded-[2.51px] 
-              font-urbanist font-bold text-[18px] leading-[120%] 
+              flex-1 h-[46px] rounded-[4px] 
+              font-urbanist font-bold text-[20px] leading-[120%] 
               flex items-center justify-center transition-all duration-300
               ${
                 selectedNumber === num

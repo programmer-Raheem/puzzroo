@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
@@ -57,7 +57,7 @@ export function SudokuGame() {
         <div className="w-full max-w-[717.5px] flex flex-col gap-[30px] pb-0 md:pb-[50px]">
           
           {/* Desktop Layout */}
-          <div className="hidden md:flex gap-[30px] justify-center">
+          <div className="hidden md:flex gap-[30px] justify-center items-start">
             {/* Sudoku Board with Win Animation */}
             <div 
               className={`flex-shrink-0 transition-all duration-1000 ease-out ${
@@ -74,10 +74,10 @@ export function SudokuGame() {
               />
             </div>
 
-            {/* Right Control Panel */}
+            {/* Right Control Panel - All 230px width */}
             <div className="w-[230px] flex flex-col gap-[20px]">
               {/* Stats with Floating Score */}
-              <div className="relative">
+              <div className="relative overflow-visible">
                 <SudokuStats
                   mistakes={mistakes}
                   maxMistakes={maxMistakes}
@@ -106,7 +106,7 @@ export function SudokuGame() {
                 onNumberSelect={selectNumber}
               />
 
-              {/* New Game Button */}
+              {/* New Game Button - Full width 230px */}
               <button
                 onClick={handleNewGame}
                 disabled={isResetting}
@@ -126,18 +126,24 @@ export function SudokuGame() {
 
           {/* Mobile Layout */}
           <div className="md:hidden flex flex-col gap-[16px] items-center pb-[50px]">
-            {/* Stats Row */}
-            <SudokuStats
-              mistakes={mistakes}
-              maxMistakes={maxMistakes}
-              score={score}
-              time={time}
-              mobile
-            />
+            {/* Stats Row - No padding, aligns with navbar, with Floating Score */}
+            <div className="w-full relative overflow-visible">
+              <SudokuStats
+                mistakes={mistakes}
+                maxMistakes={maxMistakes}
+                score={score}
+                time={time}
+                mobile
+              />
+              <FloatingScoreFeedback
+                feedbacks={scoreFeedbacks}
+                onComplete={removeScoreFeedback}
+              />
+            </div>
 
-            {/* Sudoku Board with Win Animation */}
+            {/* Sudoku Board with Win Animation - No padding, full width */}
             <div 
-              className={`transition-all duration-1000 ease-out ${
+              className={`w-full transition-all duration-1000 ease-out ${
                 isWinAnimating 
                   ? 'scale-105 drop-shadow-[0_0_30px_rgba(105,73,255,0.6)]' 
                   : ''
@@ -152,14 +158,14 @@ export function SudokuGame() {
               />
             </div>
 
-            {/* Number Pad Mobile */}
+            {/* Number Pad Mobile - No padding */}
             <SudokuNumberPad
               selectedNumber={selectedNumber}
               onNumberSelect={selectNumber}
               mobile
             />
 
-            {/* Feature Buttons Mobile */}
+            {/* Feature Buttons Mobile - No padding */}
             <SudokuControls
               notesMode={notesMode}
               availableHints={availableHints}
@@ -170,11 +176,11 @@ export function SudokuGame() {
               mobile
             />
 
-            {/* New Game Button Mobile */}
+            {/* New Game Button Mobile - No padding */}
             <button
               onClick={handleNewGame}
               disabled={isResetting}
-              className="w-full max-w-[350px] h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isResetting ? (
                 <>
@@ -192,8 +198,8 @@ export function SudokuGame() {
 
       {/* Loading Overlay for New Game */}
       {isResetting && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-[#181A20]/80 backdrop-blur-sm flex items-center justify-center z-40">
-          <div className="flex flex-col items-center gap-4">
+        <div className="fixed inset-0 bg-white/80 dark:bg-[#181A20]/80 backdrop-blur-sm z-50">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
             {/* Puzzroo Logo + Text */}
             <div className="flex items-center gap-3">
               <Image

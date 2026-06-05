@@ -42,12 +42,13 @@ import {
 
 export function useSudoku() {
   // Load difficulty preference
-  const [difficulty, setDifficulty] = useState<Difficulty>(() => loadDifficultyPreference())
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [isInitialized, setIsInitialized] = useState(false)
   
   // Initialize game state
   const initializeGame = useCallback((diff: Difficulty, loadSaved = true) => {
-    // Try to load saved game first
-    if (loadSaved) {
+    // Try to load saved game first (client-side only)
+    if (loadSaved && typeof window !== 'undefined') {
       const saved = loadGameState()
       if (saved && saved.difficulty === diff) {
         return {
@@ -81,7 +82,20 @@ export function useSudoku() {
     }
   }, [])
 
-  const [gameState, setGameState] = useState(() => initializeGame(difficulty))
+  const [gameState, setGameState] = useState(() => {
+    // Client-only: load from storage or fresh
+    const savedDifficulty = loadDifficultyPreference()
+    return initializeGame(savedDifficulty, true)
+  })
+  
+  // Load difficulty preference on client
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isInitialized) {
+      const savedDifficulty = loadDifficultyPreference()
+      setDifficulty(savedDifficulty)
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
   
   // UI state
   const [selectedCell, setSelectedCell] = useState<Position | null>(null)
@@ -191,9 +205,8 @@ export function useSudoku() {
    * Select cell
    */
   const selectCell = useCallback((position: Position | null) => {
-    if (gameState.gameStatus !== 'playing') return
     setSelectedCell(position)
-  }, [gameState.gameStatus])
+  }, [])
 
   /**
    * Enter number or note

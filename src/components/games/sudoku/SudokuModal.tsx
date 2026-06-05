@@ -61,7 +61,7 @@ export function SudokuModal({
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}>
         <div
-          className={`bg-white dark:bg-[#1F222A] rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-300 ${
+          className={`bg-[#F0EDFF] dark:bg-[#1F222A] rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-300 ${
             isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
           }`}
           role="dialog"

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -21,9 +21,15 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
   const { theme } = useTheme()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(() => 
-    loadDifficultyPreference()
-  )
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('easy')
+  
+  // Load difficulty preference on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = loadDifficultyPreference()
+      setSelectedDifficulty(saved)
+    }
+  }, [])
   
   const currentImage = theme === 'light' && imageLight ? imageLight : image
   
@@ -106,8 +112,8 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
 
         {/* Loading Overlay */}
         {isLoading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-[#181A20]/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="flex flex-col items-center gap-4">
+          <div className="fixed inset-0 bg-white/80 dark:bg-[#181A20]/80 backdrop-blur-sm z-50">
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
               {/* Puzzroo Logo + Text */}
               <div className="flex items-center gap-3">
                 <Image

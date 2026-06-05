@@ -1,11 +1,6 @@
-/**
- * Floating Score Feedback Component
- * Shows animated score changes (+10, -5, -20)
- */
-
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface ScoreFeedback {
   id: string
@@ -23,7 +18,7 @@ export function FloatingScoreFeedback({
   onComplete,
 }: FloatingScoreFeedbackProps) {
   return (
-    <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute inset-0 pointer-events-none overflow-visible z-[100]">
       {feedbacks.map((feedback) => (
         <FloatingScore
           key={feedback.id}
@@ -43,33 +38,75 @@ interface FloatingScoreProps {
 }
 
 function FloatingScore({ id, value, onComplete }: FloatingScoreProps) {
-  const [isVisible, setIsVisible] = useState(true)
+  const [stage, setStage] = useState<'enter' | 'float' | 'exit'>('enter')
 
   useEffect(() => {
-    // Fade out and remove after animation
-    const timer = setTimeout(() => {
-      setIsVisible(false)
-      onComplete(id)
-    }, 1000) // 1 second total
+    // Enter stage (appear)
+    const enterTimer = setTimeout(() => {
+      setStage('float')
+    }, 50)
 
-    return () => clearTimeout(timer)
+    // Float stage (move up and fade)
+    const floatTimer = setTimeout(() => {
+      setStage('exit')
+    }, 800)
+
+    // Exit stage (remove)
+    const exitTimer = setTimeout(() => {
+      onComplete(id)
+    }, 1200)
+
+    return () => {
+      clearTimeout(enterTimer)
+      clearTimeout(floatTimer)
+      clearTimeout(exitTimer)
+    }
   }, [id, onComplete])
 
   const isPositive = value > 0
-  const color = isPositive ? 'text-green-500' : 'text-red-500'
+  const color = isPositive ? '#22C55E' : '#F75555'
   const sign = isPositive ? '+' : ''
+
+  // Calculate transform based on stage
+  const getTransform = () => {
+    switch (stage) {
+      case 'enter':
+        return 'translate(-50%, 0) scale(0.9)'
+      case 'float':
+        return 'translate(-50%, -40px) scale(1)'
+      case 'exit':
+        return 'translate(-50%, -60px) scale(0.9)'
+      default:
+        return 'translate(-50%, 0) scale(0.9)'
+    }
+  }
+
+  const getOpacity = () => {
+    switch (stage) {
+      case 'enter':
+        return 0
+      case 'float':
+        return 1
+      case 'exit':
+        return 0
+      default:
+        return 0
+    }
+  }
 
   return (
     <div
-      className={`
-        absolute top-0 left-1/2 -translate-x-1/2
-        font-urbanist font-bold text-2xl
-        ${color}
-        transition-all duration-1000 ease-out
-        ${isVisible ? 'opacity-100 -translate-y-8' : 'opacity-0 -translate-y-12'}
-      `}
+      className="absolute top-0 left-1/2 font-urbanist font-bold text-2xl pointer-events-none z-[100]"
       style={{
-        animation: 'float-up 1s ease-out forwards',
+        color,
+        transform: getTransform(),
+        opacity: getOpacity(),
+        transition: stage === 'enter' 
+          ? 'none' 
+          : stage === 'float'
+          ? 'transform 800ms ease-out, opacity 200ms ease-out'
+          : 'transform 400ms ease-in, opacity 400ms ease-in',
+        willChange: 'transform, opacity',
       }}
     >
       {sign}{value}

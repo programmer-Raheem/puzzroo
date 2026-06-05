@@ -1,12 +1,24 @@
 'use client'
 
-import React from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { ArrowLeft } from 'lucide-react'
 
 export function SudokuHero() {
+  const router = useRouter()
+
   return (
     <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 py-[30px] md:py-[30px]">
       <div className="w-full px-[20px]">
+        {/* Back Arrow */}
+        <button
+          onClick={() => router.push('/game/sudoku')}
+          className="mb-6 w-12 h-12 rounded-full border-2 border-[var(--color-primary)] bg-white dark:bg-[#181A20] flex items-center justify-center hover:bg-[#F0EDFF] dark:hover:bg-[#35383F] transition-all duration-200 active:scale-95"
+          aria-label="Back to games"
+        >
+          <ArrowLeft size={24} className="text-[var(--color-primary)]" strokeWidth={2.5} />
+        </button>
+
         <div className="flex flex-col items-center gap-8 md:gap-10">
           
           {/* Sudoku Image with background */}

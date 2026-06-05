@@ -1,11 +1,5 @@
-/**
- * Sudoku Controls Component
- * Feature buttons (Undo, Erase, Pencil, Hint)
- */
-
 'use client'
 
-import React from 'react'
 import { RotateCcw, Eraser, Pencil, Lightbulb } from 'lucide-react'
 
 interface SudokuControlsProps {
@@ -29,7 +23,7 @@ export function SudokuControls({
 }: SudokuControlsProps) {
   if (mobile) {
     return (
-      <div className="w-full max-w-[350px] flex justify-between items-center px-2">
+      <div className="w-full flex justify-between items-center">
         {/* Undo/Replay Button */}
         <button
           onClick={onUndo}
@@ -66,14 +60,14 @@ export function SudokuControls({
         <button
           onClick={onHint}
           disabled={availableHints <=0}
-          className="relative w-[63.44px] h-[63.44px] rounded-full bg-[#F0EDFF] dark:bg-[#F0EDFF] flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative w-[63.44px] h-[63.44px] rounded-full bg-[#F0EDFF] dark:bg-[#F0EDFF] flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed overflow-visible"
           aria-label="Hint"
         >
           <Lightbulb size={34} strokeWidth={2} className="text-[#424242]" />
-          {/* Hint Badge */}
+          {/* Hint Badge - top-right position */}
           {availableHints > 0 && (
-            <span className="absolute top-0 right-0 w-[20px] h-[20px] bg-[var(--color-primary)] rounded-full border-2 border-white dark:border-[#181A20] flex items-center justify-center">
-              <span className="font-urbanist font-bold text-white text-[10px]">
+            <span className="absolute -top-1 -right-1 w-[24px] h-[24px] bg-[#A592FF] rounded-full border-2 border-white dark:border-[#181A20] flex items-center justify-center z-20">
+              <span className="font-urbanist font-bold text-white text-[11px]">
                 {availableHints}
               </span>
             </span>
@@ -125,9 +119,9 @@ export function SudokuControls({
         aria-label="Hint"
       >
         <Lightbulb size={27} strokeWidth={2} className="text-[#424242]" />
-        {/* Hint Badge */}
+        {/* Hint Badge - positioned to the right side */}
         {availableHints > 0 && (
-          <span className="absolute top-0 right-0 w-[18px] h-[18px] bg-[var(--color-primary)] rounded-full border-2 border-white dark:border-[#181A20] flex items-center justify-center">
+          <span className="absolute top-1/2 -translate-y-1/2 -right-[8px] w-[18px] h-[18px] bg-[#A592FF] rounded-full border-2 border-white dark:border-[#181A20] flex items-center justify-center z-10">
             <span className="font-urbanist font-bold text-white text-[9px]">
               {availableHints}
             </span>

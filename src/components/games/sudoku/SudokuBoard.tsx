@@ -1,11 +1,5 @@
-/**
- * Sudoku Board Component
- * The 9x9 grid of Sudoku cells
- */
-
 'use client'
 
-import React from 'react'
 import { SudokuBoard as SudokuBoardType, Position } from '@/lib/sudoku/types'
 import { SudokuCell } from './SudokuCell'
 
@@ -63,7 +57,7 @@ export function SudokuBoard({
   return (
     <div
       className={`grid grid-cols-9 ${
-        mobile ? 'w-full max-w-[350px]' : 'w-[457.5px]'
+        mobile ? 'w-full' : 'w-[457.5px]'
       } aspect-square border-[3.03px] border-[#212121] dark:border-[#FAFAFA]`}
       role="grid"
       aria-label="Sudoku board"

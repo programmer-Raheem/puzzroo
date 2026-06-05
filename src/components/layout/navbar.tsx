@@ -34,7 +34,7 @@ export function Navbar() {
           </div>
 
           {/* RIGHT: Desktop Actions */}
-          <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)]">
+          <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)] mr-[20px]">
 
             <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
               Sign up
@@ -46,7 +46,7 @@ export function Navbar() {
 
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 h-[38px] px-[clamp(12px,2vw,16px)] rounded-full hover:opacity-80 transition-all duration-200 active:scale-95 "
+              className="flex items-center gap-2 h-[38px] px-[clamp(12px,2vw,16px)] rounded-full hover:opacity-80 transition-all duration-200 active:scale-95"
               aria-label="Toggle theme"
               suppressHydrationWarning
             >
@@ -67,20 +67,20 @@ export function Navbar() {
           </div>
 
           {/* RIGHT: Mobile Actions - Theme + Hamburger */}
-          <div className="flex md:hidden items-center ml-[20px] gap-1">
+          <div className="flex md:hidden items-center gap-2 ml-[20px]">
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-1.5 h-[38px] px-2 rounded-full hover:opacity-80 transition-all duration-200 active:scale-95"
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:opacity-80 transition-all duration-200 active:scale-95"
               aria-label="Toggle theme"
               suppressHydrationWarning
             >
               <Image
                 src={images.darkIcon}
                 alt="Theme icon"
-                width={20}
-                height={20}
+                width={32}
+                height={32}
                 suppressHydrationWarning
-                className={`w-5 h-5 select-none transition-transform duration-500 ${mounted && theme === 'light' ? 'scale-x-[-1]' : ''
+                className={`w-8 h-8 select-none transition-transform duration-500 ${mounted && theme === 'light' ? 'scale-x-[-1]' : ''
                   }`}
               />
             </button>
@@ -88,7 +88,7 @@ export function Navbar() {
             {/* Hamburger Menu */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg"
+              className="rounded-lg ml-2"
               aria-label="Toggle menu"
             >
               <div className="w-5 h-4 flex flex-col justify-between">
