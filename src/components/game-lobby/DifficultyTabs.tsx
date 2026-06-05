@@ -29,6 +29,14 @@ export function DifficultyTabs({
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 84 })
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([])
 
+  // Update selected index when selectedDifficulty prop changes
+  useEffect(() => {
+    const newIndex = getInitialIndex()
+    if (newIndex !== selected) {
+      setSelected(newIndex)
+    }
+  }, [selectedDifficulty])
+
   useEffect(() => {
     const updateIndicator = () => {
       const button = buttonsRef.current[selected]

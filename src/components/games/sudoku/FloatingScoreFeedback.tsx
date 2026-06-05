@@ -71,13 +71,13 @@ function FloatingScore({ id, value, onComplete }: FloatingScoreProps) {
   const getTransform = () => {
     switch (stage) {
       case 'enter':
-        return 'translate(-50%, 0) scale(0.9)'
+        return 'translate(-50%, -20px) scale(0.9)'
       case 'float':
-        return 'translate(-50%, -40px) scale(1)'
+        return 'translate(-50%, -60px) scale(1)'
       case 'exit':
-        return 'translate(-50%, -60px) scale(0.9)'
+        return 'translate(-50%, -80px) scale(0.9)'
       default:
-        return 'translate(-50%, 0) scale(0.9)'
+        return 'translate(-50%, -20px) scale(0.9)'
     }
   }
 
@@ -96,7 +96,7 @@ function FloatingScore({ id, value, onComplete }: FloatingScoreProps) {
 
   return (
     <div
-      className="absolute top-0 left-1/2 font-urbanist font-bold text-2xl pointer-events-none z-[100]"
+      className="absolute top-1/2 left-1/2 font-urbanist font-bold text-2xl pointer-events-none z-[100]"
       style={{
         color,
         transform: getTransform(),

@@ -8,6 +8,7 @@ export interface SudokuCell {
   fixed: boolean
   notes?: number[]
   isError?: boolean // For validation errors
+  isCorrect?: boolean // For correct entries
 }
 
 export type SudokuBoard = SudokuCell[][]

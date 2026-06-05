@@ -236,7 +236,7 @@ export function useSudoku() {
 
       // Validate
       if (num !== correctValue) {
-        // Wrong answer
+        // Wrong answer - mark as error and keep it red
         newBoard[selectedCell.row][selectedCell.col].isError = true
         
         setGameState((prev) => ({
@@ -252,19 +252,11 @@ export function useSudoku() {
           setGameState((prev) => ({ ...prev, gameStatus: 'lost' }))
           clearGameState()
         }
-
-        // Clear error after 1 second
-        setTimeout(() => {
-          setGameState((prev) => {
-            const clearedBoard = cloneBoard(prev.currentBoard)
-            if (clearedBoard[selectedCell.row]?.[selectedCell.col]) {
-              clearedBoard[selectedCell.row][selectedCell.col].isError = false
-            }
-            return { ...prev, currentBoard: clearedBoard }
-          })
-        }, 1000)
+        
+        // Error state persists - no setTimeout to clear it
       } else {
-        // Correct answer
+        // Correct answer - mark as correct with purple tint
+        newBoard[selectedCell.row][selectedCell.col].isCorrect = true
         updateScore(10) // +10 for correct answer
         
         setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
@@ -317,7 +309,7 @@ export function useSudoku() {
   }, [selectedCell, gameState])
 
   /**
-   * Use hint
+   * Use hint - applies to selected cell only
    */
   const requestHint = useCallback(() => {
     if (gameState.gameStatus !== 'playing') return
@@ -325,16 +317,21 @@ export function useSudoku() {
     const availableHints = calculateAvailableHints(gameState.score)
     if (availableHints <= 0) return
 
-    const emptyCell = findEmptyCell(gameState.currentBoard)
-    if (!emptyCell) return
+    // Must have a selected cell
+    if (!selectedCell) return
 
-    const correctValue = getCorrectValue(gameState.solution, emptyCell)
+    const cell = getCellAt(gameState.currentBoard, selectedCell)
+    if (!cell || cell.fixed || cell.value) return // Don't hint filled or fixed cells
+
+    const correctValue = getCorrectValue(gameState.solution, selectedCell)
     if (!correctValue) return
 
-    let newBoard = updateCellValue(gameState.currentBoard, emptyCell, correctValue)
-    newBoard[emptyCell.row][emptyCell.col] = clearNotes(
-      newBoard[emptyCell.row][emptyCell.col]
+    let newBoard = updateCellValue(gameState.currentBoard, selectedCell, correctValue)
+    newBoard[selectedCell.row][selectedCell.col] = clearNotes(
+      newBoard[selectedCell.row][selectedCell.col]
     )
+    // Mark as correct
+    newBoard[selectedCell.row][selectedCell.col].isCorrect = true
 
     updateScore(-20) // -20 for hint
     setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
@@ -349,7 +346,7 @@ export function useSudoku() {
         clearGameState()
       }, 1500)
     }
-  }, [gameState, updateScore])
+  }, [selectedCell, gameState, updateScore])
 
   /**
    * Change difficulty

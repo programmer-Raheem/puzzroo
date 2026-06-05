@@ -23,7 +23,7 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 py-4 md:py-0 lg:py-14 md:pb-3"
+      className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 py-4 md:py-0 lg:py-14"
     >
       <div className="w-full px-[20px]">
         <div className="flex flex-col gap-7">
@@ -77,13 +77,13 @@ function FAQItemComponent({ faq, isOpen, onToggle, onKeyDown }: FAQItemComponent
       onKeyDown={onKeyDown}
     >
       {/* Question and Icon Row */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <h3 className="font-urbanist font-bold text-[18px] md:text-[clamp(1.125rem,3vw,1.5rem)] leading-[120%] text-[#181A20] dark:text-white transition-colors duration-300 flex-1">
           {faq.question}
         </h3>
         
         {/* Dropdown Icon */}
-        <div className="flex-shrink-0 mt-2">
+        <div className="flex-shrink-0">
           <Image
             src={images.dropdownIcon}
             alt="Toggle"

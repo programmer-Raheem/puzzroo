@@ -34,6 +34,8 @@ export function SudokuCell({
   let bgClass = ''
   if (cell.isError) {
     bgClass = '!bg-[#F75555] hover:!bg-[#F75555]'
+  } else if (cell.isCorrect) {
+    bgClass = 'bg-[#E8DFFF]'
   } else if (isSelected) {
     bgClass = 'bg-[#A592FF] ring-2 ring-[var(--color-primary)] ring-inset'
   } else if (hasSelectedNumberHighlight) {

@@ -31,13 +31,13 @@ export function SudokuStats({
   if (mobile) {
     return (
       <div className="w-full flex justify-between items-center">
-        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Mistakes: <span className="text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>{mistakes}/{maxMistakes}</span>
         </span>
-        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Score: <span className="text-[var(--color-primary)] inline-block min-w-[2.5ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{score}</span>
         </span>
-        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Time: <span className="text-[var(--color-primary)] inline-block min-w-[5ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(time)}</span>
         </span>
       </div>
@@ -48,17 +48,17 @@ export function SudokuStats({
     <div className="w-[230px] flex flex-col gap-[12px]">
       {/* Score - centered with stable width */}
       <div className="text-center">
-        <span className="font-urbanist font-semibold text-[24px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[24px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Score: <span className="text-[var(--color-primary)] inline-block min-w-[3ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{score}</span>
         </span>
       </div>
 
       {/* Mistakes and Time with stable widths */}
       <div className="flex justify-between items-center">
-        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Mistakes: <span className="text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>{mistakes}/{maxMistakes}</span>
         </span>
-        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
+        <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#E0E0E0]">
           Time: <span className="text-[var(--color-primary)] inline-block min-w-[5ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(time)}</span>
         </span>
       </div>

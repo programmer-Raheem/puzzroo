@@ -43,10 +43,11 @@ export function SudokuGame() {
     router.push('/game/sudoku')
   }
 
-  const handleNewGame = async () => {
+  const handleNewGame = async (fromModal = false) => {
     setIsResetting(true)
-    // Show loading for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // 1.5 seconds from modal (after win/loss), 1.0 second during active play
+    const delay = fromModal ? 1500 : 1000
+    await new Promise(resolve => setTimeout(resolve, delay))
     resetBoard()
     setIsResetting(false)
   }
@@ -108,7 +109,7 @@ export function SudokuGame() {
 
               {/* New Game Button - Full width 230px */}
               <button
-                onClick={handleNewGame}
+                onClick={() => handleNewGame(false)}
                 disabled={isResetting}
                 className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
@@ -178,7 +179,7 @@ export function SudokuGame() {
 
             {/* New Game Button Mobile - No padding */}
             <button
-              onClick={handleNewGame}
+              onClick={() => handleNewGame(false)}
               disabled={isResetting}
               className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -229,7 +230,7 @@ export function SudokuGame() {
         time={time}
         mistakes={mistakes}
         score={score}
-        onPlayAgain={handleNewGame}
+        onPlayAgain={() => handleNewGame(true)}
         onBackToGames={handleBackToGames}
       />
 
@@ -238,7 +239,7 @@ export function SudokuGame() {
         isOpen={gameStatus === 'lost'}
         type="gameOver"
         score={score}
-        onPlayAgain={handleNewGame}
+        onPlayAgain={() => handleNewGame(true)}
         onBackToGames={handleBackToGames}
       />
     </section>

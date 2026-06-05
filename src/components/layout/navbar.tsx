@@ -50,6 +50,9 @@ export function Navbar() {
               aria-label="Toggle theme"
               suppressHydrationWarning
             >
+              <span className="font-urbanist text-[14px] font-medium text-[#181A20] dark:text-white transition-colors duration-300">
+                {mounted && theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+              </span>
               <Image
                 src={images.darkIcon}
                 alt="Theme icon"
@@ -59,9 +62,6 @@ export function Navbar() {
                 className={`w-5 h-5 select-none transition-transform duration-500 ${mounted && theme === 'light' ? 'scale-x-[-1]' : ''
                   }`}
               />
-              <span className="font-urbanist text-[14px] font-medium text-[#181A20] dark:text-white transition-colors duration-300">
-                {mounted && theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-              </span>
             </button>
 
           </div>
@@ -77,10 +77,10 @@ export function Navbar() {
               <Image
                 src={images.darkIcon}
                 alt="Theme icon"
-                width={32}
-                height={32}
+                width={20}
+                height={20}
                 suppressHydrationWarning
-                className={`w-8 h-8 select-none transition-transform duration-500 ${mounted && theme === 'light' ? 'scale-x-[-1]' : ''
+                className={`w-5 h-5 select-none transition-transform duration-500 ${mounted && theme === 'light' ? 'scale-x-[-1]' : ''
                   }`}
               />
             </button>
