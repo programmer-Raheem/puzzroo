@@ -30,12 +30,12 @@ export function SudokuStats({
 
   if (mobile) {
     return (
-      <div className="w-full flex justify-between items-center px-[20px]">
+      <div className="w-full flex justify-between items-center">
         <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
-          Mistakes: <span className="text-[var(--color-primary)] font-variant-numeric: tabular-nums">{mistakes}/{maxMistakes}</span>
+          Mistakes: <span className="text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>{mistakes}/{maxMistakes}</span>
         </span>
         <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
-          Score: <span className="text-[var(--color-primary)] inline-block min-w-[2.5ch] font-variant-numeric: tabular-nums">{score}</span>
+          Score: <span className="text-[var(--color-primary)] inline-block min-w-[2.5ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{score}</span>
         </span>
         <span className="font-urbanist font-semibold text-[16px] leading-[140%] tracking-[0.2px] text-[var(--color-heading)] dark:text-[#E0E0E0]">
           Time: <span className="text-[var(--color-primary)] inline-block min-w-[5ch]" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(time)}</span>

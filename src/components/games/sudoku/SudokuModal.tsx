@@ -1,11 +1,6 @@
-/**
- * Sudoku Modal Component
- * Reusable modal for Win and Game Over states
- */
-
 'use client'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 interface SudokuModalProps {
   isOpen: boolean

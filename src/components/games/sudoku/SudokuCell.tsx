@@ -24,7 +24,9 @@ export function SudokuCell({
   const isRightBorder = (position.col + 1) % 3 === 0 && position.col !== 8
   const isBottomBorder = (position.row + 1) % 3 === 0 && position.row !== 8
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     onClick(position)
   }
 
@@ -53,11 +55,12 @@ export function SudokuCell({
   return (
     <button
       onClick={handleClick}
+      onMouseDown={(e) => e.preventDefault()}
       className={`
         flex items-center justify-center
         border-[1.52px] border-[#424242] dark:border-[#FAFAFA]
         font-urbanist font-bold ${textSizeClass} leading-[120%]
-        transition-colors duration-100
+        transition-colors duration-150
         relative
         ${textColorClass}
         ${bgClass}
@@ -65,7 +68,6 @@ export function SudokuCell({
         ${borderBottomClass}
         cursor-pointer
         focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]
-        active:scale-95
       `}
       aria-label={`Cell ${position.row + 1}, ${position.col + 1}${
         cell.value ? `, value ${cell.value}` : ', empty'
