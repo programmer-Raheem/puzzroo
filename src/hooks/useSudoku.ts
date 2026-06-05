@@ -309,7 +309,7 @@ export function useSudoku() {
   }, [selectedCell, gameState])
 
   /**
-   * Use hint - applies to selected cell only
+   * Use hint - applies to selected cell, or random cell if none selected
    */
   const requestHint = useCallback(() => {
     if (gameState.gameStatus !== 'playing') return
@@ -317,21 +317,34 @@ export function useSudoku() {
     const availableHints = calculateAvailableHints(gameState.score)
     if (availableHints <= 0) return
 
-    // Must have a selected cell
-    if (!selectedCell) return
+    let targetCell: Position | null = null
 
-    const cell = getCellAt(gameState.currentBoard, selectedCell)
-    if (!cell || cell.fixed || cell.value) return // Don't hint filled or fixed cells
+    // If cell is selected, use it
+    if (selectedCell) {
+      const cell = getCellAt(gameState.currentBoard, selectedCell)
+      // Only use selected cell if it's empty and not fixed
+      if (cell && !cell.fixed && !cell.value) {
+        targetCell = selectedCell
+      }
+    }
 
-    const correctValue = getCorrectValue(gameState.solution, selectedCell)
+    // If no valid selected cell, find random empty cell
+    if (!targetCell) {
+      targetCell = findEmptyCell(gameState.currentBoard)
+    }
+
+    // No empty cells available
+    if (!targetCell) return
+
+    const correctValue = getCorrectValue(gameState.solution, targetCell)
     if (!correctValue) return
 
-    let newBoard = updateCellValue(gameState.currentBoard, selectedCell, correctValue)
-    newBoard[selectedCell.row][selectedCell.col] = clearNotes(
-      newBoard[selectedCell.row][selectedCell.col]
+    let newBoard = updateCellValue(gameState.currentBoard, targetCell, correctValue)
+    newBoard[targetCell.row][targetCell.col] = clearNotes(
+      newBoard[targetCell.row][targetCell.col]
     )
     // Mark as correct
-    newBoard[selectedCell.row][selectedCell.col].isCorrect = true
+    newBoard[targetCell.row][targetCell.col].isCorrect = true
 
     updateScore(-20) // -20 for hint
     setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
