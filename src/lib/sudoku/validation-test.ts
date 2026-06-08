@@ -268,10 +268,10 @@ function validatePuzzle(puzzleData: SudokuPuzzleData): ValidationResult {
 export function runFullValidation(): void {
   console.log('🔍 Starting Comprehensive Sudoku Validation...\n')
   
-  const allPuzzles = [
-    ...easyPuzzles.map(p => ({ ...p, difficulty: 'easy' })),
-    ...mediumPuzzles.map(p => ({ ...p, difficulty: 'medium' })),
-    ...hardPuzzles.map(p => ({ ...p, difficulty: 'hard' })),
+  const allPuzzles: SudokuPuzzleData[] = [
+    ...easyPuzzles,
+    ...mediumPuzzles,
+    ...hardPuzzles,
   ]
   
   const results: ValidationResult[] = []
