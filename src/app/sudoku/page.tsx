@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -8,7 +8,7 @@ import { SudokuHero } from '@/components/sudoku/SudokuHero'
 import { SudokuGame } from '@/components/sudoku/SudokuGame'
 import { markGameAsPlayed } from '@/components/sections/FreeGames'
 
-export default function SudokuPage() {
+function SudokuContent() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,12 +33,22 @@ export default function SudokuPage() {
   }
 
   return (
+    <>
+      <SudokuHero />
+      <SudokuGame />
+    </>
+  )
+}
+
+export default function SudokuPage() {
+  return (
     <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300 flex flex-col">
       <div className="w-full max-w-[1380px] mx-auto flex-grow flex flex-col pb-0 md:pb-[50px]">
         <Navbar />
         <main className="flex-grow flex flex-col">
-          <SudokuHero />
-          <SudokuGame />
+          <Suspense fallback={<div className="flex-grow" />}>
+            <SudokuContent />
+          </Suspense>
         </main>
       </div>
       <Footer />
