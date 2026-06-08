@@ -30,6 +30,8 @@ import {
   findEmptyCell,
   calculateAvailableHints,
   convertToSudokuBoard,
+  isValidMove,
+  isValidCompletedBoard,
 } from '@/lib/sudoku/helpers'
 import { KEYBOARD_KEYS, INITIAL_GAME_STATE } from '@/lib/sudoku/constants'
 import {
@@ -226,7 +228,6 @@ export function useSudoku() {
       }
 
       // Normal mode - enter final number
-      const correctValue = getCorrectValue(gameState.solution, selectedCell)
       let newBoard = updateCellValue(gameState.currentBoard, selectedCell, num)
       
       // Clear notes when entering final number
@@ -234,10 +235,34 @@ export function useSudoku() {
         newBoard[selectedCell.row][selectedCell.col]
       )
 
-      // Validate
-      if (num !== correctValue) {
-        // Wrong answer - mark as error and keep it red
+      // Validate using Sudoku rules (no duplicates in row/column/box)
+      const isValid = isValidMove(gameState.currentBoard, selectedCell, num)
+      const correctValue = getCorrectValue(gameState.solution, selectedCell)
+
+      // 🔍 DEBUG: Log validation details
+      console.log('🎯 VALIDATION:', {
+        row: selectedCell.row,
+        col: selectedCell.col,
+        enteredValue: num,
+        isValidBySudokuRules: isValid,
+        matchesSolution: num === correctValue,
+        solutionValue: correctValue,
+        puzzleId: gameState.puzzleId,
+        difficulty,
+      })
+
+      // Validate based on Sudoku rules
+      if (!isValid) {
+        // Invalid move - violates Sudoku rules (duplicate in row/column/box)
+        console.warn('❌ INVALID MOVE (Sudoku rules violated):', {
+          row: selectedCell.row,
+          col: selectedCell.col,
+          enteredValue: num,
+          puzzleId: gameState.puzzleId,
+        })
+        
         newBoard[selectedCell.row][selectedCell.col].isError = true
+        newBoard[selectedCell.row][selectedCell.col].isCorrect = false
         
         setGameState((prev) => ({
           ...prev,
@@ -255,14 +280,18 @@ export function useSudoku() {
         
         // Error state persists - no setTimeout to clear it
       } else {
-        // Correct answer - mark as correct with purple tint
+        // Valid move - follows Sudoku rules
+        console.log('✅ VALID MOVE (Sudoku rules satisfied)')
+        
+        newBoard[selectedCell.row][selectedCell.col].isError = false
         newBoard[selectedCell.row][selectedCell.col].isCorrect = true
         updateScore(10) // +10 for correct answer
         
         setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
 
-        // Check for win
-        if (isBoardComplete(newBoard) && validateBoardAgainstSolution(newBoard, gameState.solution)) {
+        // Check for win - validate entire board using Sudoku rules
+        if (isBoardComplete(newBoard) && isValidCompletedBoard(newBoard)) {
+          console.log('🎉 PUZZLE COMPLETED! All Sudoku rules satisfied.')
           setIsWinAnimating(true)
           
           setTimeout(() => {
@@ -275,7 +304,7 @@ export function useSudoku() {
 
       setSelectedNumber(num)
     },
-    [selectedCell, gameState, notesMode, updateScore]
+    [selectedCell, gameState, notesMode, updateScore, difficulty]
   )
 
   /**
@@ -301,9 +330,17 @@ export function useSudoku() {
     if (!cell || cell.fixed) return
 
     const newBoard = clearCell(gameState.currentBoard, selectedCell)
+    // Clear notes and reset state flags
     newBoard[selectedCell.row][selectedCell.col] = clearNotes(
       newBoard[selectedCell.row][selectedCell.col]
     )
+    newBoard[selectedCell.row][selectedCell.col].isCorrect = false
+    newBoard[selectedCell.row][selectedCell.col].isError = false
+    
+    console.log('🧹 CELL ERASED:', {
+      row: selectedCell.row,
+      col: selectedCell.col,
+    })
     
     setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
   }, [selectedCell, gameState])
@@ -349,8 +386,9 @@ export function useSudoku() {
     updateScore(-20) // -20 for hint
     setGameState((prev) => ({ ...prev, currentBoard: newBoard }))
 
-    // Check for win
-    if (isBoardComplete(newBoard) && validateBoardAgainstSolution(newBoard, gameState.solution)) {
+    // Check for win - validate entire board using Sudoku rules
+    if (isBoardComplete(newBoard) && isValidCompletedBoard(newBoard)) {
+      console.log('🎉 PUZZLE COMPLETED! All Sudoku rules satisfied.')
       setIsWinAnimating(true)
       
       setTimeout(() => {
@@ -365,9 +403,13 @@ export function useSudoku() {
    * Change difficulty
    */
   const changeDifficulty = useCallback((newDifficulty: Difficulty) => {
+    console.log('🔄 DIFFICULTY CHANGED:', {
+      from: difficulty,
+      to: newDifficulty,
+    })
     setDifficulty(newDifficulty)
     saveDifficultyPreference(newDifficulty)
-  }, [])
+  }, [difficulty])
 
   /**
    * Reset board / New game

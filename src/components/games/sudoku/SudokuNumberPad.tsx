@@ -20,27 +20,53 @@ export function SudokuNumberPad({
 }: SudokuNumberPadProps) {
   if (mobile) {
     return (
-      <div className="flex justify-between items-center gap-[6px] w-full">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
-            key={num}
-            onClick={() => onNumberSelect(num)}
-            className={`
-              flex-1 h-[46px] rounded-[4px] 
-              font-urbanist font-bold text-[20px] leading-[120%] 
-              flex items-center justify-center transition-all duration-300
-              ${
-                selectedNumber === num
-                  ? 'bg-[#A592FF] text-white'
-                  : 'bg-[#F5F5F5] dark:bg-[#1F222A] text-[#424242] dark:text-[#F5F5F5] hover:bg-[#A592FF] hover:text-white'
-              }
-            `}
-            aria-label={`Number ${num}`}
-            aria-pressed={selectedNumber === num}
-          >
-            {num}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-[6px] w-full">
+        {/* Row 1: Numbers 1-5 */}
+        <div className="flex justify-center items-center gap-[6px] w-full">
+          {[1, 2, 3, 4, 5].map((num) => (
+            <button
+              key={num}
+              onClick={() => onNumberSelect(num)}
+              className={`
+                w-[calc((100%-24px)/5)] h-[46px] rounded-[4px] 
+                font-urbanist font-bold text-[20px] leading-[120%] 
+                flex items-center justify-center transition-all duration-300
+                ${
+                  selectedNumber === num
+                    ? 'bg-[#A592FF] text-white'
+                    : 'bg-[#F5F5F5] dark:bg-[#1F222A] text-[#424242] dark:text-[#F5F5F5] hover:bg-[#A592FF] hover:text-white'
+                }
+              `}
+              aria-label={`Number ${num}`}
+              aria-pressed={selectedNumber === num}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+        {/* Row 2: Numbers 6-9 - same width as row 1 buttons */}
+        <div className="flex justify-center items-center gap-[6px] w-full">
+          {[6, 7, 8, 9].map((num) => (
+            <button
+              key={num}
+              onClick={() => onNumberSelect(num)}
+              className={`
+                w-[calc((100%-24px)/5)] h-[46px] rounded-[4px] 
+                font-urbanist font-bold text-[20px] leading-[120%] 
+                flex items-center justify-center transition-all duration-300
+                ${
+                  selectedNumber === num
+                    ? 'bg-[#A592FF] text-white'
+                    : 'bg-[#F5F5F5] dark:bg-[#1F222A] text-[#424242] dark:text-[#F5F5F5] hover:bg-[#A592FF] hover:text-white'
+                }
+              `}
+              aria-label={`Number ${num}`}
+              aria-pressed={selectedNumber === num}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
       </div>
     )
   }

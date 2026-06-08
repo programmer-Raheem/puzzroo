@@ -34,10 +34,12 @@ export function SudokuCell({
   let bgClass = ''
   if (cell.isError) {
     bgClass = '!bg-[#F75555] hover:!bg-[#F75555]'
-  } else if (cell.isCorrect) {
-    bgClass = 'bg-[#E8DFFF]'
   } else if (isSelected) {
+    // Selected state takes priority - show selection even on correct cells
     bgClass = 'bg-[#A592FF] ring-2 ring-[var(--color-primary)] ring-inset'
+  } else if (cell.isCorrect) {
+    // Correct cell (not selected) - purple tint
+    bgClass = 'bg-[#E8DFFF] hover:bg-[#D4C5FF]'
   } else if (hasSelectedNumberHighlight) {
     bgClass = 'bg-[#A592FF]'
   } else if (isHighlighted) {

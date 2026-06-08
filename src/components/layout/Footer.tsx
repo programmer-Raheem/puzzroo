@@ -20,13 +20,13 @@ export function Footer() {
           {/* Right Side: Links */}
           <div className="flex items-center gap-4 md:gap-6">
             <Link
-              href="/privacy"
+              href="/privacy-policy"
               className="font-urbanist font-medium text-[12px] leading-[100%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] hover:text-[#6949FF] dark:hover:text-[#6949FF] transition-colors duration-200 whitespace-nowrap"
             >
               Privacy Policy
             </Link>
             <Link
-              href="/terms"
+              href="/terms-and-conditions"
               className="font-urbanist font-medium text-[12px] leading-[100%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] hover:text-[#6949FF] dark:hover:text-[#6949FF] transition-colors duration-200 whitespace-nowrap"
             >
               Terms and Conditions

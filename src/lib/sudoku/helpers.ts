@@ -84,6 +84,95 @@ export function getCorrectValue(
 }
 
 /**
+ * Validates if the entire board is a valid completed Sudoku
+ */
+export function isValidCompletedBoard(board: SudokuBoard): boolean {
+  // Check if board is complete
+  if (!isBoardComplete(board)) {
+    return false
+  }
+
+  // Check all rows
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    const rowValues = new Set<number>()
+    for (let col = 0; col < BOARD_SIZE; col++) {
+      const value = board[row][col].value
+      if (!value || value < 1 || value > 9 || rowValues.has(value)) {
+        return false // Invalid or duplicate
+      }
+      rowValues.add(value)
+    }
+  }
+
+  // Check all columns
+  for (let col = 0; col < BOARD_SIZE; col++) {
+    const colValues = new Set<number>()
+    for (let row = 0; row < BOARD_SIZE; row++) {
+      const value = board[row][col].value
+      if (!value || colValues.has(value)) {
+        return false // Duplicate
+      }
+      colValues.add(value)
+    }
+  }
+
+  // Check all 3x3 boxes
+  for (let boxRow = 0; boxRow < 3; boxRow++) {
+    for (let boxCol = 0; boxCol < 3; boxCol++) {
+      const boxValues = new Set<number>()
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const value = board[boxRow * 3 + row][boxCol * 3 + col].value
+          if (!value || boxValues.has(value)) {
+            return false // Duplicate
+          }
+          boxValues.add(value)
+        }
+      }
+    }
+  }
+
+  return true // Valid completed Sudoku
+}
+
+/**
+ * Check if a number is valid at a position (Sudoku rules)
+ */
+export function isValidMove(
+  board: SudokuBoard,
+  pos: Position,
+  num: number
+): boolean {
+  // Check row
+  for (let col = 0; col < BOARD_SIZE; col++) {
+    if (col !== pos.col && board[pos.row][col].value === num) {
+      return false // Duplicate in row
+    }
+  }
+
+  // Check column
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    if (row !== pos.row && board[row][pos.col].value === num) {
+      return false // Duplicate in column
+    }
+  }
+
+  // Check 3x3 box
+  const boxStartRow = Math.floor(pos.row / 3) * 3
+  const boxStartCol = Math.floor(pos.col / 3) * 3
+  
+  for (let row = boxStartRow; row < boxStartRow + 3; row++) {
+    for (let col = boxStartCol; col < boxStartCol + 3; col++) {
+      if ((row !== pos.row || col !== pos.col) && board[row][col].value === num) {
+        return false // Duplicate in box
+      }
+    }
+  }
+
+  return true // Valid move
+}
+
+/**
  * Formats time in seconds to MM:SS format
  */
 export function formatTime(seconds: number): string {
