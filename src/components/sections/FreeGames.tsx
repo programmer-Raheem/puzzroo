@@ -26,10 +26,10 @@ const gamesData: GameCard[] = [
   },
   {
     id: 'crossword',
-    title: 'CROSS WORD',
+    title: 'CROSS MATH',
     status: 'Unplayed',
     image: images.gameCards.crossWord,
-    imageAlt: 'Cross Word Game',
+    imageAlt: 'Cross Math Game',
   },
   {
     id: 'sudoku',

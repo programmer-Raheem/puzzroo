@@ -33,18 +33,18 @@ export const games: Game[] = [
   {
     id: 'crossword',
     slug: 'crossword',
-    name: 'Crossword',
+    name: 'CrossMath',
     image: images.gameCards.crossWord,
-    difficulty: ['Easy', 'Medium', 'Hard', 'Expert'],
-    about: 'Dive into the classic world of crossword puzzles with our beautifully designed digital version. Test your vocabulary, general knowledge, and problem-solving abilities with carefully crafted clues ranging from straightforward definitions to clever wordplay. Each puzzle is uniquely generated to provide fresh challenges every time you play.',
-    howToPlay: 'Click on any numbered square to view its clue. Type your answer directly into the grid - the cursor will automatically advance to the next square. Use the clue panel to navigate between across and down clues. If you get stuck, you can reveal a letter, word, or check your entire puzzle for errors. The timer tracks your solving speed, but you can play at your own pace. Complete the entire grid correctly to finish the puzzle and view your statistics.',
+    difficulty: ['Easy', 'Medium', 'Hard'],
+    about: 'CrossMath combines the challenge of mathematical equations with the logic of crossword-style puzzles. Fill in the missing numbers to complete equations that work both horizontally and vertically. Perfect for sharpening your arithmetic skills and logical thinking in an engaging puzzle format.',
+    howToPlay: 'Select an empty cell and enter a number to complete the equations. Each number must satisfy both the horizontal and vertical equations that intersect at that cell. Numbers can only be used once per puzzle, so choose wisely. Use the available numbers shown in the number pad. The equations follow standard order of operations (multiplication and division before addition and subtraction). Complete all cells correctly to win the puzzle.',
     bulletPoints: [
-      'Letters must form valid words in both across and down directions',
-      'Each numbered clue corresponds to a specific starting position in grid',
-      'Black squares separate different words throughout the puzzle grid',
-      'Use hints sparingly to maintain challenge and improve solving skills'
+      'Each horizontal equation must calculate correctly from left to right',
+      'Each vertical equation must calculate correctly from top to bottom',
+      'Numbers can only be used once per puzzle challenge',
+      'Equations follow standard mathematical order of operations'
     ],
-    keyboardControls: 'Type letters directly to fill squares. Use ARROW KEYS or TAB to navigate between squares. Press SPACE to switch between across and down directions. Press DELETE or BACKSPACE to erase letters.'
+    keyboardControls: 'Type numbers to fill cells. Use ARROW KEYS to navigate between cells. Press DELETE or BACKSPACE to erase numbers. Press N for a new game.'
   },
   {
     id: 'sudoku',

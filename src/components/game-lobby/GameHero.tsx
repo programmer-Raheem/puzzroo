@@ -33,9 +33,10 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
   
   const currentImage = theme === 'light' && imageLight ? imageLight : image
   
-  // Check if this is Sudoku to link to the actual game page
+  // Check if this is Sudoku or CrossMath to link to the actual game page
   const isSudoku = name.toLowerCase() === 'sudoku'
-  const playUrl = isSudoku ? '/sudoku' : '#'
+  const isCrossMath = name.toLowerCase() === 'crossmath'
+  const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/crossmath' : '#'
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
     setSelectedDifficulty(difficulty)
@@ -43,12 +44,12 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
   }
 
   const handlePlayClick = async (e: React.MouseEvent) => {
-    if (isSudoku) {
+    if (isSudoku || isCrossMath) {
       e.preventDefault()
       setIsLoading(true)
       // Show loading for 2-3 seconds
       await new Promise(resolve => setTimeout(resolve, 2500))
-      router.push(playUrl)
+      router.push(`${playUrl}?difficulty=${selectedDifficulty.toLowerCase()}`)
     }
   }
 
@@ -82,7 +83,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
             />
 
             {/* Play Button with Icon */}
-            {isSudoku ? (
+            {(isSudoku || isCrossMath) ? (
               <button
                 onClick={handlePlayClick}
                 disabled={isLoading}
