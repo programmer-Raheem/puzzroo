@@ -26,7 +26,7 @@ export function CrossMathBoard({
         ${mobile ? 'w-full' : 'w-auto'}
         bg-white dark:bg-[#262A34]
         rounded-[12px]
-        p-[24px]
+        p-[12px]
         border-[1.5px] border-[#E0E0E0] dark:border-[#35383F]
         transition-colors duration-300
       `}

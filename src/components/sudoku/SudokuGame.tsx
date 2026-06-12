@@ -40,10 +40,20 @@ export function SudokuGame() {
     removeScoreFeedback,
   } = useSudoku()
 
-  // Update URL when difficulty changes
+  // Prevent scroll when loading overlay is active (New Game loading)
   useEffect(() => {
-    router.replace(`/sudoku?difficulty=${difficulty}`, { scroll: false })
-  }, [difficulty, router])
+    if (isResetting) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [isResetting])
 
   const handleBackToGames = () => {
     router.push('/game/sudoku')

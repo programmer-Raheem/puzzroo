@@ -29,6 +29,8 @@
     --foreground: #ededed;
     
     /* Dark Mode Overrides */
+    --color-primary: #6949FF;
+    --color-primary-hover: #5536E6;
     --color-heading: #FFFFFF;
     --color-body: #E0E0E0;
     --color-bg-secondary: #1F222A;
@@ -50,4 +52,29 @@ body {
 
 * {
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Branded Scrollbar for Desktop Browsers */
+@media (min-width: 1024px) {
+  /* Chrome, Safari, Edge, Opera */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6949FF;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5536E6;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #6949FF transparent;
+  }
 }

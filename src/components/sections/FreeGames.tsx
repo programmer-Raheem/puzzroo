@@ -25,7 +25,7 @@ const gamesData: GameCard[] = [
     imageAlt: 'Number Ninja Game',
   },
   {
-    id: 'crossword',
+    id: 'cross-math',
     title: 'CROSS MATH',
     status: 'Unplayed',
     image: images.gameCards.crossWord,

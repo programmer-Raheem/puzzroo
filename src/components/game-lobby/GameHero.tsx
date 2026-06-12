@@ -30,13 +30,28 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
       setSelectedDifficulty(saved)
     }
   }, [])
+
+  // Lock body scroll when loading overlay is active
+  useEffect(() => {
+    if (isLoading) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [isLoading])
   
   const currentImage = theme === 'light' && imageLight ? imageLight : image
   
   // Check if this is Sudoku or CrossMath to link to the actual game page
   const isSudoku = name.toLowerCase() === 'sudoku'
-  const isCrossMath = name.toLowerCase() === 'crossmath'
-  const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/crossmath' : '#'
+  const isCrossMath = name.toLowerCase() === 'cross math' || name.toLowerCase() === 'cross-math' || name.toLowerCase() === 'crossmath'
+  const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/cross-math' : '#'
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
     setSelectedDifficulty(difficulty)
@@ -55,7 +70,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
 
   return (
     <>
-      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 py-12 md:py-16 relative">
+      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 pt-12 md:pt-16 pb-12 relative">
         <div className="w-full px-[20px]">
           <div className="flex flex-col items-center gap-8 md:gap-10">
             
@@ -71,7 +86,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
             </div>
 
             {/* Game Title */}
-            <h1 className="font-urbanist font-bold text-[48px] leading-[120%] text-center text-[#212121] dark:text-white transition-colors duration-300">
+            <h1 className="font-urbanist font-bold text-[30px] md:text-[48px] leading-[120%] text-center text-[#212121] dark:text-white transition-colors duration-300">
               {name}
             </h1>
 

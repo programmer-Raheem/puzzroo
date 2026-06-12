@@ -31,12 +31,12 @@ export const games: Game[] = [
     keyboardControls: 'Use mouse clicks or touch gestures to select numbers. Press SPACE to confirm your selection, ESC to pause the game, and R to restart the current level.'
   },
   {
-    id: 'crossword',
-    slug: 'crossword',
-    name: 'CrossMath',
+    id: 'cross-math',
+    slug: 'cross-math',
+    name: 'Cross Math',
     image: images.gameCards.crossWord,
     difficulty: ['Easy', 'Medium', 'Hard'],
-    about: 'CrossMath combines the challenge of mathematical equations with the logic of crossword-style puzzles. Fill in the missing numbers to complete equations that work both horizontally and vertically. Perfect for sharpening your arithmetic skills and logical thinking in an engaging puzzle format.',
+    about: 'Cross Math combines the challenge of mathematical equations with the logic of crossword-style puzzles. Fill in the missing numbers to complete equations that work both horizontally and vertically. Perfect for sharpening your arithmetic skills and logical thinking in an engaging puzzle format.',
     howToPlay: 'Select an empty cell and enter a number to complete the equations. Each number must satisfy both the horizontal and vertical equations that intersect at that cell. Numbers can only be used once per puzzle, so choose wisely. Use the available numbers shown in the number pad. The equations follow standard order of operations (multiplication and division before addition and subtraction). Complete all cells correctly to win the puzzle.',
     bulletPoints: [
       'Each horizontal equation must calculate correctly from left to right',

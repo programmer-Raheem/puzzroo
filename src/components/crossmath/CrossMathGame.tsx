@@ -53,10 +53,20 @@ export function CrossMathGame() {
     }
   }, [gameStatus])
 
-  // Update URL when difficulty changes
+  // Prevent scroll when loading overlay is active (New Game loading)
   useEffect(() => {
-    router.replace(`/crossmath?difficulty=${difficulty}`, { scroll: false })
-  }, [difficulty, router])
+    if (isResetting) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [isResetting])
 
   const handleNewGame = async () => {
     setIsResetting(true)
@@ -96,7 +106,7 @@ export function CrossMathGame() {
         <div className="w-full max-w-[1200px] flex flex-col gap-[15px] pb-0 md:pb-[50px]">
           
           {/* Desktop Layout */}
-          <div className="hidden md:flex gap-[30px] justify-center items-center">
+          <div className="hidden md:flex gap-[30px] lg:gap-[48px] justify-center items-start">
             {/* CrossMath Board */}
             <div className="flex-shrink-0 relative">
               <CrossMathBoard

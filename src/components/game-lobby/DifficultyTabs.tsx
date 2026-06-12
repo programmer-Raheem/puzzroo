@@ -69,11 +69,11 @@ export function DifficultyTabs({
   }
 
   return (
-    <div className="flex items-center justify-center gap-4">
-      <span className="font-urbanist font-bold text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[var(--color-light)]">
+    <div className="flex flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto max-w-[340px] sm:max-w-none px-4 sm:px-0">
+      <span className="font-urbanist font-bold text-[15px] sm:text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[var(--color-light)] whitespace-nowrap flex-shrink-0">
         Difficulty:
       </span>
-      <div className="flex items-center gap-0 w-[253px] justify-between relative">
+      <div className="flex items-center gap-0 flex-1 sm:w-[253px] sm:flex-none justify-between relative">
         {modes.map((difficulty, index) => (
           <button
             key={difficulty}
@@ -81,10 +81,10 @@ export function DifficultyTabs({
               buttonsRef.current[index] = el
             }}
             onClick={() => handleClick(index)}
-            className="relative flex flex-col items-center gap-2 group z-10"
+            className="relative flex flex-col items-center gap-1.5 group z-10 flex-1 sm:flex-none"
           >
             <span
-              className={`font-urbanist font-bold text-[14px] md:text-[16px] transition-all duration-700 ease-in-out px-4 ${
+              className={`font-urbanist font-bold text-[13px] sm:text-[14px] md:text-[16px] transition-all duration-700 ease-in-out px-2 sm:px-4 ${
                 selected === index
                   ? 'text-[var(--color-primary)]'
                   : 'text-[#9E9E9E] group-hover:text-[#757575]'
@@ -93,7 +93,7 @@ export function DifficultyTabs({
               {difficulty}
             </span>
             {/* Grey background line */}
-            <div className="grey-line w-[84px] md:w-[100px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
+            <div className="grey-line w-[68px] sm:w-[84px] md:w-[100px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
           </button>
         ))}
         

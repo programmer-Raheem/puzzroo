@@ -36,13 +36,17 @@ export function Navbar() {
           {/* RIGHT: Desktop Actions */}
           <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)] mr-[20px]">
 
-            <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
-              Sign up
-            </button>
+            <Link href="/signup">
+              <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
+                Sign up
+              </button>
+            </Link>
 
-            <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
-              Login
-            </button>
+            <Link href="/login">
+              <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
+                Login
+              </button>
+            </Link>
 
             <button
               onClick={toggleTheme}
@@ -106,12 +110,16 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#181A20] border-t border-gray-200 dark:border-gray-800 z-50 shadow-lg">
           <div className="flex flex-col items-center gap-4 py-6">
-            <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
-              Login
-            </button>
-            <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
-              Sign up
-            </button>
+            <Link href="/login">
+              <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
+                Login
+              </button>
+            </Link>
+            <Link href="/signup">
+              <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
+                Sign up
+              </button>
+            </Link>
           </div>
         </div>
       )}

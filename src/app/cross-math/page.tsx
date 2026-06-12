@@ -17,14 +17,14 @@ function CrossMathContent() {
     setMounted(true)
     
     // Mark CrossMath as played
-    markGameAsPlayed('crossword')
+    markGameAsPlayed('cross-math')
     
     // Get difficulty from URL or use default
     const difficulty = searchParams.get('difficulty') || 'easy'
     
     // Validate difficulty
     if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-      router.replace('/crossmath?difficulty=easy')
+      router.replace('/cross-math?difficulty=easy')
     }
   }, [searchParams, router])
 

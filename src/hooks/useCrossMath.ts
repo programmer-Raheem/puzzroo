@@ -50,10 +50,10 @@ export function useCrossMath() {
     Object.values(currentPuzzle.solution).forEach(val => {
       if (padSet.has(val)) {
         counts.set(val, (counts.get(val) || 0) + 1)
-      }
+      }  
     })
     return counts
-  }, [currentPuzzle])
+  }, [currentPuzzle])        
 
   // Initialize puzzle
   useEffect(() => {

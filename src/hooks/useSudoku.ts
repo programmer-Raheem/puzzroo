@@ -13,7 +13,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { SudokuBoard, Position, GameStatus, Difficulty } from '@/lib/sudoku/types'
 import { getRandomPuzzle } from '@/data/sudoku'
 import type { ScoreFeedback } from '@/components/games/sudoku/FloatingScoreFeedback'
@@ -45,6 +45,8 @@ import {
 
 export function useSudoku() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const urlDifficulty = (searchParams.get('difficulty') || 'easy') as Difficulty
   
   // Load difficulty preference
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -88,19 +90,68 @@ export function useSudoku() {
   }, [])
 
   const [gameState, setGameState] = useState(() => {
-    // Client-only: load from storage or fresh
-    const savedDifficulty = loadDifficultyPreference()
-    return initializeGame(savedDifficulty, true)
+    // Fallback initializer for initial server render
+    return initializeGame('easy', false)
   })
   
-  // Load difficulty preference on client
+  // Sync with URL difficulty on mount/change
   useEffect(() => {
-    if (typeof window !== 'undefined' && !isInitialized) {
-      const savedDifficulty = loadDifficultyPreference()
-      setDifficulty(savedDifficulty)
+    if (typeof window !== 'undefined') {
+      const valid = ['easy', 'medium', 'hard', 'expert']
+      const currentDiff = valid.includes(urlDifficulty) ? urlDifficulty : 'easy'
+      
+      setDifficulty(currentDiff)
+      saveDifficultyPreference(currentDiff)
+      
+      setGameState((prev) => {
+        // Only re-initialize if the loaded game is for a different difficulty
+        if (isInitialized && prev.puzzleId && prev.currentBoard.length > 0) {
+          // If we already initialized a board of this difficulty, do not overwrite it
+          const saved = loadGameState()
+          if (saved && saved.difficulty === currentDiff) {
+            return saved
+          }
+          // If there is no saved game, but prev difficulty matches currentDiff, keep it
+          // This avoids re-generating on hot reloads/re-renders
+          const currentBoardDiff = prev.currentBoard.some(row => row.some(cell => cell.value !== undefined)) ? null : currentDiff
+          // Actually, we can check a simple flag or just verify the current board.
+        }
+
+        // Try to load saved game first
+        const saved = loadGameState()
+        if (saved && saved.difficulty === currentDiff) {
+          return {
+            currentBoard: saved.currentBoard,
+            initialBoard: saved.initialBoard,
+            solution: saved.solution,
+            puzzleId: saved.puzzleId,
+            mistakes: saved.mistakes,
+            score: saved.score,
+            time: saved.time,
+            gameStatus: saved.gameStatus as GameStatus,
+          }
+        }
+        
+        // Start fresh
+        const puzzle = getRandomPuzzle(currentDiff)
+        const currentBoard = convertToSudokuBoard(puzzle.puzzle)
+        const initialBoard = cloneBoard(currentBoard)
+        const solution = convertToSudokuBoard(puzzle.solution)
+        return {
+          currentBoard,
+          initialBoard,
+          solution,
+          puzzleId: puzzle.id,
+          mistakes: 0,
+          score: 0,
+          time: 0,
+          gameStatus: 'playing' as GameStatus,
+        }
+      })
+      
       setIsInitialized(true)
     }
-  }, [isInitialized])
+  }, [urlDifficulty])
   
   // UI state
   const [selectedCell, setSelectedCell] = useState<Position | null>(null)
@@ -130,7 +181,7 @@ export function useSudoku() {
    * Auto-save game state
    */
   useEffect(() => {
-    if (gameState.gameStatus === 'playing') {
+    if (isInitialized && gameState.gameStatus === 'playing') {
       saveGameState({
         currentBoard: gameState.currentBoard,
         initialBoard: gameState.initialBoard,
@@ -143,7 +194,7 @@ export function useSudoku() {
         gameStatus: gameState.gameStatus,
       })
     }
-  }, [gameState, difficulty])
+  }, [gameState, difficulty, isInitialized])
 
   /**
    * Timer management

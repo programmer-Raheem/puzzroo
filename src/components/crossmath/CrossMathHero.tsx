@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ArrowLeft, Loader2 } from 'lucide-react'
@@ -10,10 +10,25 @@ export function CrossMathHero() {
   const router = useRouter()
   const [isNavigating, setIsNavigating] = useState(false)
 
+  // Prevent scroll when loading overlay is active
+  useEffect(() => {
+    if (isNavigating) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+  }, [isNavigating])
+
   const handleBackClick = async () => {
     setIsNavigating(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
-    router.push('/game/crossword')
+    router.push('/game/cross-math')
   }
 
   return (
@@ -44,8 +59,8 @@ export function CrossMathHero() {
             </div>
 
             {/* CrossMath Title */}
-            <h1 className="font-urbanist font-bold text-[48px] leading-[120%] text-center text-[#212121] dark:text-[#FAFAFA] transition-colors duration-300">
-              CROSSMATH
+            <h1 className="font-urbanist font-bold text-[30px] md:text-[48px] leading-[120%] text-center text-[#212121] dark:text-[#FAFAFA] transition-colors duration-300">
+              CROSS MATH
             </h1>
 
           </div>
