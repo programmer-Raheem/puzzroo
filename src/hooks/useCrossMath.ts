@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Cell, Difficulty, CrossMathPuzzle } from '@/lib/crossmath/types'
-import { getRandomPuzzle } from '@/data/crossmath'
+import { getRandomPuzzle, getRandomPatternPuzzle } from '@/data/crossmath'
 import { SCORING } from '@/lib/crossmath/constants'
 import {
   isBoardComplete,
@@ -21,6 +21,8 @@ import {
 export function useCrossMath() {
   const searchParams = useSearchParams()
   const difficultyParam = (searchParams.get('difficulty') || 'easy') as Difficulty
+  // Pattern mode is disabled to load the exact hand-crafted layout shapes
+  const usePatternMode = false
   
   const [difficulty, setDifficulty] = useState<Difficulty>(difficultyParam)
   const [board, setBoard] = useState<Cell[][]>([])
@@ -71,7 +73,7 @@ export function useCrossMath() {
       setIsTyping(false)
       
       // Get puzzle to restore metadata
-      const puzzle = getRandomPuzzle(difficulty)
+      const puzzle = usePatternMode ? getRandomPatternPuzzle(difficulty) : getRandomPuzzle(difficulty)
       setCurrentPuzzle(puzzle)
       setMaxMistakes(puzzle.maxMistakes)
       setAvailableNumbers(new Set(puzzle.availableNumbers))
@@ -89,7 +91,7 @@ export function useCrossMath() {
       setUsedNumbersCount(usedCount)
     } else {
       // Start new game
-      const puzzle = getRandomPuzzle(difficulty)
+      const puzzle = usePatternMode ? getRandomPatternPuzzle(difficulty) : getRandomPuzzle(difficulty)
       const gridCopy = puzzle.grid.map(row => row.map(cell => ({ ...cell })))
       setBoard(gridCopy)
       setCurrentPuzzle(puzzle)
@@ -104,7 +106,7 @@ export function useCrossMath() {
       setIsTyping(false)
       clearGameState()
     }
-  }, [difficulty])
+  }, [difficulty, usePatternMode])
 
   // Save game state whenever it changes
   useEffect(() => {
@@ -350,7 +352,7 @@ export function useCrossMath() {
   }, [selectedCell, board, gameStatus, usedNumbersCount])
 
   const resetBoard = useCallback(() => {
-    const puzzle = getRandomPuzzle(difficulty)
+    const puzzle = usePatternMode ? getRandomPatternPuzzle(difficulty) : getRandomPuzzle(difficulty)
     const gridCopy = puzzle.grid.map(row => row.map(cell => ({ ...cell })))
     setBoard(gridCopy)
     setCurrentPuzzle(puzzle)
@@ -364,7 +366,7 @@ export function useCrossMath() {
     setSelectedCell(null)
     setIsTyping(false)
     clearGameState()
-  }, [difficulty])
+  }, [difficulty, usePatternMode])
 
   const requestHint = useCallback(() => {
     if (gameStatus !== 'playing' || !currentPuzzle) return

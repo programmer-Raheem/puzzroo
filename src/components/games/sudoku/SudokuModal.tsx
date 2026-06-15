@@ -7,9 +7,11 @@ interface SudokuModalProps {
   type: 'win' | 'gameOver'
   time?: number
   mistakes?: number
+  maxMistakes?: number
   score?: number
   onPlayAgain: () => void
   onBackToGames?: () => void
+  gameName?: string
 }
 
 export function SudokuModal({
@@ -17,9 +19,11 @@ export function SudokuModal({
   type,
   time,
   mistakes,
+  maxMistakes,
   score,
   onPlayAgain,
   onBackToGames,
+  gameName = 'Sudoku',
 }: SudokuModalProps) {
   // Handle ESC key
   useEffect(() => {
@@ -75,7 +79,7 @@ export function SudokuModal({
                   Congratulations!
                 </h2>
                 <p className="font-urbanist text-[#424242] dark:text-[#E0E0E0] text-lg">
-                  You solved the Sudoku puzzle!
+                  You solved the {gameName} puzzle!
                 </p>
               </div>
 
@@ -94,7 +98,7 @@ export function SudokuModal({
                     Mistakes
                   </span>
                   <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
-                    {mistakes ?? 0}/3
+                    {mistakes ?? 0}/{maxMistakes ?? 3}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -142,7 +146,23 @@ export function SudokuModal({
               </div>
 
               {/* Final Score */}
-              <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl p-4 mb-6">
+              <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl p-4 mb-6 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Time
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
+                    {time !== undefined ? formatTime(time) : '00:00'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Mistakes
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
+                    {mistakes ?? 0}/{maxMistakes ?? 3}
+                  </span>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
                     Final Score

@@ -106,13 +106,18 @@ export function CrossMathGame() {
         <div className="w-full max-w-[1200px] flex flex-col gap-[15px] pb-0 md:pb-[50px]">
           
           {/* Desktop Layout */}
-          <div className="hidden md:flex gap-[30px] lg:gap-[48px] justify-center items-start">
-            {/* CrossMath Board */}
+          <div className="hidden md:flex gap-[30px] lg:gap-[48px] justify-center items-center">
+            {/* CrossMath Board - Center aligned for easy mode */}
             <div className="flex-shrink-0 relative">
               <CrossMathBoard
                 board={board}
                 selectedCell={selectedCell}
                 onCellClick={selectCell}
+              />
+              {/* Floating Score Feedback */}
+              <FloatingScoreFeedback
+                feedbacks={scoreFeedbacks}
+                onComplete={handleFeedbackComplete}
               />
             </div>
 
@@ -245,9 +250,11 @@ export function CrossMathGame() {
         type={gameStatus === 'won' ? 'win' : 'gameOver'}
         time={time}
         mistakes={mistakes}
+        maxMistakes={maxMistakes}
         score={score}
         onPlayAgain={handlePlayAgain}
         onBackToGames={handleBackToGames}
+        gameName="CrossMath"
       />
 
       {/* Loading Overlay for New Game */}

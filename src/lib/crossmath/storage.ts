@@ -2,7 +2,7 @@ import { Difficulty } from './types'
 
 const DIFFICULTY_KEY = 'crossmath_difficulty_preference'
 const STORAGE_KEY = 'puzzroo_crossmath_game'
-const STORAGE_VERSION = '1.0'
+const STORAGE_VERSION = '1.3'
 
 const isBrowser = typeof window !== 'undefined'
 

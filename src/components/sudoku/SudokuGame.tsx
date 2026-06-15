@@ -245,6 +245,7 @@ export function SudokuGame() {
         type="win"
         time={time}
         mistakes={mistakes}
+        maxMistakes={maxMistakes}
         score={score}
         onPlayAgain={() => handleNewGame(true)}
         onBackToGames={handleBackToGames}
@@ -254,6 +255,9 @@ export function SudokuGame() {
       <SudokuModal
         isOpen={gameStatus === 'lost'}
         type="gameOver"
+        time={time}
+        mistakes={mistakes}
+        maxMistakes={maxMistakes}
         score={score}
         onPlayAgain={() => handleNewGame(true)}
         onBackToGames={handleBackToGames}

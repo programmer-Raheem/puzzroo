@@ -15,6 +15,9 @@ interface GameCard {
   imageAlt: string
 }
 
+// Active games that are fully implemented
+const ACTIVE_GAMES = ['sudoku', 'cross-math']
+
 const gamesData: GameCard[] = [
   {
     id: 'number-ninja',
@@ -141,10 +144,77 @@ interface GameCardComponentProps {
 
 function GameCardComponent({ game, isPlayed }: GameCardComponentProps) {
   const { theme } = useTheme()
+  const isActive = ACTIVE_GAMES.includes(game.id)
   
   const currentImage = theme === 'light' && game.imageLight ? game.imageLight : game.image
   const displayStatus = isPlayed ? 'Played' : game.status
   
+  // Locked/Coming Soon state
+  if (!isActive) {
+    return (
+      <div className="flex flex-col bg-[#F0EDFF] dark:bg-[#1F222A] rounded-[6px] md:rounded-[12.31px] p-[12px] md:p-[20px] lg:p-[30.78px] gap-[12px] md:gap-[20px] lg:gap-[30.78px] opacity-60 cursor-not-allowed relative md:min-h-auto">
+        {/* Overlay effect */}
+        <div className="absolute inset-0 bg-gray-500/10 dark:bg-black/20 backdrop-blur-[2px] rounded-[6px] md:rounded-[12.31px] z-10 flex items-center justify-center">
+          <span className="font-urbanist font-bold text-[16px] md:text-[24px] lg:text-[32px] text-[#212121] dark:text-[#FAFAFA] bg-white/80 dark:bg-black/60 px-6 py-3 rounded-full backdrop-blur-sm">
+            Coming Soon
+          </span>
+        </div>
+        
+        {/* Game Image - Grayscale */}
+        <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-[#F0EDFF] dark:bg-[#1F222A] grayscale">
+          <Image
+            src={currentImage}
+            alt={game.imageAlt}
+            width={0}
+            height={0}
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="w-full h-full object-cover select-none"
+          />
+        </div>
+
+        {/* Text Content */}
+        <div className="flex flex-col gap-[10px] md:gap-[15px] lg:gap-[20.52px] md:flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className="font-urbanist font-bold text-[9px] md:text-[clamp(1rem,3vw,1.28rem)] leading-[120%] text-[#212121] dark:text-[#FAFAFA]">
+              {game.title}
+            </h3>
+            <span className="font-urbanist font-semibold text-[7px] md:text-[clamp(0.8rem,2.5vw,1.03rem)] leading-[140%] tracking-[0.21px] text-[#9E9E9E] dark:text-[#757575]">
+              {displayStatus}
+            </span>
+          </div>
+
+          {/* Button Group - Disabled */}
+          <div className="flex flex-col gap-[6px] md:gap-[10px]">
+            {/* Daily Challenge Button - Disabled */}
+            <button 
+              disabled 
+              className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#BDBDBD] bg-[#E0E0E0] dark:bg-[#424242] dark:border-[#616161] text-[#757575] dark:text-[#9E9E9E] font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] cursor-not-allowed py-[4.32px] px-[17.3px] md:py-0 md:px-0"
+            >
+              Daily Challenge
+            </button>
+
+            {/* Play Now Button - Disabled */}
+            <button 
+              disabled 
+              className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#BDBDBD] bg-[#E0E0E0] dark:bg-[#424242] dark:border-[#616161] text-[#757575] dark:text-[#9E9E9E] font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] cursor-not-allowed py-[4.32px] px-[17.3px] md:py-0 md:px-0"
+            >
+              Play Now
+            </button>
+
+            {/* Past Puzzle Button - Disabled */}
+            <button 
+              disabled 
+              className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#BDBDBD] bg-white dark:bg-[#1F222A] dark:border-[#616161] text-[#757575] dark:text-[#9E9E9E] font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] cursor-not-allowed py-[4.32px] px-[17.3px] md:py-0 md:px-0"
+            >
+              Past Puzzle
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
+  // Active game card with 3 buttons
   return (
     <div className="flex flex-col bg-[#F0EDFF] dark:bg-[#1F222A] rounded-[6px] md:rounded-[12.31px] p-[12px] md:p-[20px] lg:p-[30.78px] gap-[12px] md:gap-[20px] lg:gap-[30.78px] hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group md:min-h-auto">
       {/* Game Image - Fluid and responsive */}
@@ -172,12 +242,29 @@ function GameCardComponent({ game, isPlayed }: GameCardComponentProps) {
           </span>
         </div>
 
-        {/* Play Now Button - with margin-top auto only on desktop to push to bottom */}
-        <Link href={`/game/${game.id}`} className="w-full">
-          <button className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-[2px] md:rounded-[4px] border-[0.86px] md:border-2 border-[#6949FF] bg-[#6949FF] hover:bg-[#5536E6] hover:border-[#5536E6] text-white font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] transition-all duration-200 active:scale-95 py-[4.32px] px-[17.3px] md:py-0 md:px-0 md:mt-auto" aria-label={`Play ${game.title}`}>
-            {isPlayed ? 'Play Again' : 'Play Now'}
-          </button>
-        </Link>
+        {/* Button Group */}
+        <div className="flex flex-col gap-[6px] md:gap-[10px]">
+          {/* Daily Challenge Button */}
+          <Link href={`/daily-challenge/${game.id}`} className="w-full">
+            <button className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#6949FF] bg-[#6949FF] hover:bg-[#5536E6] hover:border-[#5536E6] text-white font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] transition-all duration-200 active:scale-95 py-[4.32px] px-[17.3px] md:py-0 md:px-0" aria-label={`Daily Challenge for ${game.title}`}>
+              Daily Challenge
+            </button>
+          </Link>
+
+          {/* Play Now Button */}
+          <Link href={`/game/${game.id}`} className="w-full">
+            <button className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#6949FF] bg-[#6949FF] hover:bg-[#5536E6] hover:border-[#5536E6] text-white font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] transition-all duration-200 active:scale-95 py-[4.32px] px-[17.3px] md:py-0 md:px-0" aria-label={`Play ${game.title}`}>
+              {isPlayed ? 'Play Again' : 'Play Now'}
+            </button>
+          </Link>
+
+          {/* Past Puzzle Button */}
+          <Link href={`/past-puzzles/${game.id}`} className="w-full group">
+            <button className="w-full h-[18.65px] md:h-[38px] lg:h-[42px] flex items-center justify-center rounded-full border-[0.86px] md:border-2 border-[#6949FF] bg-white dark:bg-[#1F222A] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] hover:text-white font-urbanist font-semibold text-[7px] md:text-[clamp(0.875rem,2vw,1rem)] transition-all duration-200 active:scale-95 py-[4.32px] px-[17.3px] md:py-0 md:px-0" aria-label={`Past Puzzles for ${game.title}`}>
+              Past Puzzle
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   )

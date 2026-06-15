@@ -15,9 +15,15 @@ export function CrossMathCell({ cell, isSelected, onClick }: CrossMathCellProps)
   const isNumber = cell.type === 'number'
   const isOperator = cell.type === 'operator'
 
-  // If operator cell is empty (no value), don't render anything
+  // Dead cells: non-editable empty cells that aren't part of the pattern
+  // Render as fully transparent so the board shape shows clearly
+  if (!isEditable && isEmpty && !cell.value) {
+    return <div className="aspect-square w-full" aria-hidden="true" />
+  }
+
+  // Operator spacer cells (no value)
   if (isOperator && !cell.value) {
-    return <div className="aspect-square w-full" />
+    return <div className="aspect-square w-full" aria-hidden="true" />
   }
 
   // Background colors

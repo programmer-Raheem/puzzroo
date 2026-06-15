@@ -1,0 +1,88 @@
+'use client'
+
+import { Suspense } from 'react'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+import { getTodayChallenge, generateDailyChallenge } from '@/lib/dailyChallenge/generator'
+import { useEffect, useState } from 'react'
+import { DailyChallenge } from '@/lib/dailyChallenge/types'
+import { SudokuGame } from '@/components/sudoku/SudokuGame'
+import { CrossMathGame } from '@/components/crossmath/CrossMathGame'
+import { GameHero } from '@/components/game-lobby/GameHero'
+import Navbar from '@/components/layout/navbar'
+import Footer from '@/components/layout/Footer'
+import { images } from '@/lib/utils'
+
+function DailyChallengeContent() {
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const gameId = params.gameId as string
+  const dateParam = searchParams.get('date')
+
+  const [challenge, setChallenge] = useState<DailyChallenge | null>(null)
+
+  useEffect(() => {
+    if (dateParam) {
+      // Parse date from MM-DD-YY format
+      const [month, day, year] = dateParam.split('-')
+      const fullYear = 2000 + parseInt(year)
+      const date = new Date(fullYear, parseInt(month) - 1, parseInt(day))
+      const specificChallenge = generateDailyChallenge(date, gameId as 'sudoku' | 'cross-math')
+      setChallenge(specificChallenge)
+    } else {
+      // Get today's challenge
+      const todayChallenge = getTodayChallenge(gameId as 'sudoku' | 'cross-math')
+      setChallenge(todayChallenge)
+    }
+  }, [gameId, dateParam])
+
+  if (!challenge) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#181A20]">
+        <Loader2 className="animate-spin text-[var(--color-primary)]" size={48} />
+      </div>
+    )
+  }
+
+  // Get game details for hero
+  const gameName = gameId === 'sudoku' ? 'Sudoku' : gameId === 'cross-math' ? 'Cross Math' : gameId
+  const gameImage = gameId === 'sudoku' ? images.gameCards.sudoku : images.gameCards.crossWord
+  const difficulties = ['easy', 'medium', 'hard']
+
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-white dark:bg-[#181A20]">
+        <GameHero
+          name={gameName}
+          image={gameImage}
+          difficulties={difficulties}
+        />
+        {gameId === 'sudoku' ? (
+          <SudokuGame />
+        ) : gameId === 'cross-math' ? (
+          <CrossMathGame />
+        ) : (
+          <div className="flex items-center justify-center min-h-screen">
+            <p className="text-2xl">Game not found</p>
+          </div>
+        )}
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default function DailyChallengePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#181A20]">
+        <Loader2 className="animate-spin text-[var(--color-primary)]" size={48} />
+      </div>
+    }>
+      <DailyChallengeContent />
+    </Suspense>
+  )
+}
+
