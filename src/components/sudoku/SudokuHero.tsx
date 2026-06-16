@@ -6,7 +6,11 @@ import Image from 'next/image'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { images } from '@/lib/utils'
 
-export function SudokuHero() {
+interface SudokuHeroProps {
+  backTo?: string // Optional custom back navigation path
+}
+
+export function SudokuHero({ backTo }: SudokuHeroProps = {}) {
   const router = useRouter()
   const [isNavigating, setIsNavigating] = useState(false)
 
@@ -29,7 +33,7 @@ export function SudokuHero() {
     setIsNavigating(true)
     // Show loading for 1 second
     await new Promise(resolve => setTimeout(resolve, 1000))
-    router.push('/game/sudoku')
+    router.push(backTo || '/game/sudoku')
   }
 
   return (

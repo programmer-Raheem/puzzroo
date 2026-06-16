@@ -87,11 +87,11 @@ export function CrossMathCell({ cell, isSelected, onClick }: CrossMathCellProps)
       onClick={onClick}
       disabled={!isEditable}
       className={`
-        aspect-square w-full
+        aspect-square w-full min-w-[36px] min-h-[36px] md:min-w-[46px] md:min-h-[46px]
         flex items-center justify-center
         rounded-[4px]
         font-urbanist font-bold
-        text-[clamp(0.875rem,2vw,1.25rem)] md:text-[clamp(1rem,1.5vw,1.5rem)]
+        text-[15px] md:text-[20px] lg:text-[22px]
         ${bgColor}
         ${borderClass}
         ${textColor}

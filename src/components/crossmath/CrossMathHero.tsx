@@ -6,7 +6,11 @@ import Image from 'next/image'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { images } from '@/lib/utils'
 
-export function CrossMathHero() {
+interface CrossMathHeroProps {
+  backTo?: string // Optional custom back navigation path
+}
+
+export function CrossMathHero({ backTo }: CrossMathHeroProps = {}) {
   const router = useRouter()
   const [isNavigating, setIsNavigating] = useState(false)
 
@@ -28,7 +32,7 @@ export function CrossMathHero() {
   const handleBackClick = async () => {
     setIsNavigating(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
-    router.push('/game/cross-math')
+    router.push(backTo || '/game/cross-math')
   }
 
   return (

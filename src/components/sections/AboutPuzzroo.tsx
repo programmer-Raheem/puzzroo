@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import Image from 'next/image'
 import { images } from '@/lib/utils'
 
@@ -8,11 +7,23 @@ export function AboutPuzzroo() {
   return (
     <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 py-10 md:py-14">
       <div className="w-full px-[20px]">
-        {/* Background Container with Purple Gradient */}
+        {/* Background Container with Purple Gradient and Feature Background */}
         <div className="relative bg-gradient-to-br from-[#6949FF] to-[#8B5CF6] rounded-[20px] py-10 md:py-12 px-6 md:px-12 overflow-hidden">
           
+          {/* Feature Background Image */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none z-[3]">
+            <Image
+              src={images.featureBackground}
+              alt="Background Pattern"
+              fill
+              priority
+              className="object-cover object-center opacity-30"
+            />
+          </div>
+
+          {/* Decorative Background Pattern (Circles) */}
           {/* Decorative Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 z-[2]">
             <div className="absolute top-10 right-10 w-32 h-32 border-4 border-white rounded-full"></div>
             <div className="absolute bottom-10 left-10 w-24 h-24 border-4 border-white rounded-full"></div>
             <div className="absolute top-1/2 left-1/3 w-16 h-16 border-4 border-white rounded-full"></div>

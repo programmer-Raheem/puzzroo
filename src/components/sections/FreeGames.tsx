@@ -20,18 +20,18 @@ const ACTIVE_GAMES = ['sudoku', 'cross-math']
 
 const gamesData: GameCard[] = [
   {
-    id: 'cross-math',
-    title: 'CROSS MATH',
-    status: 'Unplayed',
-    image: images.gameCards.crossWord,
-    imageAlt: 'Cross Math Game',
-  },
-  {
     id: 'sudoku',
     title: 'Sudoku',
     status: 'Unplayed',
     image: images.gameCards.sudoku,
     imageAlt: 'Sudoku Game',
+  },
+  {
+    id: 'cross-math',
+    title: 'CROSS MATH',
+    status: 'Unplayed',
+    image: images.gameCards.crossWord,
+    imageAlt: 'Cross Math Game',
   },
   {
     id: 'number-ninja',

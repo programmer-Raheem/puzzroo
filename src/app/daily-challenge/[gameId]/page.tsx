@@ -1,20 +1,21 @@
 'use client'
 
 import { Suspense } from 'react'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { getTodayChallenge, generateDailyChallenge } from '@/lib/dailyChallenge/generator'
 import { useEffect, useState } from 'react'
 import { DailyChallenge } from '@/lib/dailyChallenge/types'
 import { SudokuGame } from '@/components/sudoku/SudokuGame'
+import { SudokuHero } from '@/components/sudoku/SudokuHero'
 import { CrossMathGame } from '@/components/crossmath/CrossMathGame'
+import { CrossMathHero } from '@/components/crossmath/CrossMathHero'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
 function DailyChallengeContent() {
   const params = useParams()
   const searchParams = useSearchParams()
-  const router = useRouter()
   const gameId = params.gameId as string
   const dateParam = searchParams.get('date')
 
@@ -44,21 +45,32 @@ function DailyChallengeContent() {
   }
 
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-white dark:bg-[#181A20]">
-        {gameId === 'sudoku' ? (
-          <SudokuGame />
-        ) : gameId === 'cross-math' ? (
-          <CrossMathGame />
-        ) : (
-          <div className="flex items-center justify-center min-h-screen">
-            <p className="text-2xl">Game not found</p>
-          </div>
-        )}
-      </main>
+    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300 flex flex-col">
+      <div className="w-full max-w-[1380px] mx-auto flex-grow flex flex-col pb-0 md:pb-[50px]">
+        <Navbar />
+        <main className="flex-grow flex flex-col">
+          
+          {/* Reuse existing Hero components with custom back navigation */}
+          {gameId === 'sudoku' ? (
+            <>
+              <SudokuHero backTo="/#free-games" />
+              <SudokuGame />
+            </>
+          ) : gameId === 'cross-math' ? (
+            <>
+              <CrossMathHero backTo="/#free-games" />
+              <CrossMathGame />
+            </>
+          ) : (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <p className="text-2xl">Game not found</p>
+            </div>
+          )}
+          
+        </main>
+      </div>
       <Footer />
-    </>
+    </div>
   )
 }
 

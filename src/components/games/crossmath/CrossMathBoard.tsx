@@ -49,7 +49,7 @@ export function CrossMathBoard({
         ${mobile ? 'w-full' : 'w-auto'}
         bg-white dark:bg-[#262A34]
         rounded-[12px]
-        p-[12px]
+        p-[12px] md:p-[16px]
         border-[1.5px] border-[#E0E0E0] dark:border-[#35383F]
         transition-colors duration-300
       `}
@@ -58,7 +58,7 @@ export function CrossMathBoard({
       }}
     >
       <div
-        className="grid gap-[2px] w-full"
+        className="grid gap-[2px] md:gap-[3px] w-full"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gridTemplateRows: `repeat(${rows}, 1fr)`,
