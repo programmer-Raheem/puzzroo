@@ -126,8 +126,8 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
                 </button>
               </div>
 
-              {/* Past Puzzle Grid - Match FreeGames mobile layout */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-7 lg:gap-[30px]">
+              {/* Past Puzzle Grid - 1 column mobile, 4 columns desktop */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-7 lg:gap-[30px]">
                 {filteredPuzzles.map((puzzle, index) => (
                   <PuzzleCard
                     key={puzzle.id}

@@ -12,7 +12,7 @@ interface GameInfoProps {
 
 export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControls }: GameInfoProps) {
   return (
-    <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 pt-0 pb-12 md:pt-12 md:pb-16">
+    <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 pt-0 pb-2 md:pt-2 ">
       <div className="w-full px-[20px]">
         <div className="w-full max-w-[646px] mx-auto flex flex-col gap-10">
 

@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/Footer'
 import { GameHero } from '@/components/game-lobby/GameHero'
 import { GameInfo } from '@/components/game-lobby/GameInfo'
+import { GamePromo } from '@/components/game-lobby/GamePromo'
 
 export async function generateStaticParams() {
   return games.map((game) => ({
@@ -53,6 +54,7 @@ export default async function GameLobbyPage({ params }: { params: Promise<{ slug
             bulletPoints={game.bulletPoints}
             keyboardControls={game.keyboardControls}
           />
+          <GamePromo />
         </main>
       </div>
       <Footer />
