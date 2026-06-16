@@ -9,9 +9,10 @@ interface CalendarModalProps {
   isOpen: boolean
   onClose: () => void
   gameId: string
+  onDateSelected?: (dateString: string) => void
 }
 
-export function CalendarModal({ isOpen, onClose, gameId }: CalendarModalProps) {
+export function CalendarModal({ isOpen, onClose, gameId, onDateSelected }: CalendarModalProps) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -81,15 +82,23 @@ export function CalendarModal({ isOpen, onClose, gameId }: CalendarModalProps) {
       return
     }
 
-    // Check if puzzle exists for this date
+    // Format date string
+    const dateString = `${String(clickedDate.getMonth() + 1).padStart(2, '0')}-${String(clickedDate.getDate()).padStart(2, '0')}-${String(clickedDate.getFullYear()).slice(-2)}`
+    
+    // If onDateSelected callback is provided, use it (for past puzzles page)
+    if (onDateSelected) {
+      setSelectedDate(clickedDate)
+      setErrorMessage('')
+      onDateSelected(dateString)
+      return
+    }
+
+    // Otherwise, navigate to daily challenge (original behavior)
     try {
       const puzzle = generateDailyChallenge(clickedDate, gameId as 'sudoku' | 'cross-math')
       if (puzzle) {
         setSelectedDate(clickedDate)
         setErrorMessage('')
-        
-        // Navigate to daily challenge with date parameter
-        const dateString = `${String(clickedDate.getMonth() + 1).padStart(2, '0')}-${String(clickedDate.getDate()).padStart(2, '0')}-${String(clickedDate.getFullYear()).slice(-2)}`
         router.push(`/daily-challenge/${gameId}?date=${dateString}`)
         onClose()
       }

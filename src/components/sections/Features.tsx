@@ -32,15 +32,15 @@ export function Features() {
         {/* MOBILE LAYOUT - Completely Different */}
         <div className="md:hidden flex flex-col gap-7">
           {/* Mobile: Star Icon + Heading (Center-aligned) */}
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center gap-2">
             <Image
               src={images.starIcon}
               alt="Star Icon"
-              width={24}
-              height={24}
-              className="w-6 h-6 select-none flex-shrink-0"
+              width={18}
+              height={18}
+              className="w-[18px] h-[18px] select-none flex-shrink-0"
             />
-            <h2 className="font-urbanist font-bold text-[21px] leading-[120%] tracking-[0%] text-[#212121] dark:text-white transition-colors duration-300 text-center whitespace-nowrap">
+            <h2 className="font-urbanist font-bold text-[16px] leading-[120%] tracking-[-0.02em] text-[#212121] dark:text-white transition-colors duration-300 text-center whitespace-nowrap">
               Upgrade To Get Exclusive Access.
             </h2>
           </div>

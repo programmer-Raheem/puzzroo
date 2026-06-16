@@ -70,7 +70,7 @@ export function GamePromo() {
 
           {/* Log In Button - Full Width */}
           <Link href="/login" className="w-full">
-            <button className="w-full h-[46px] rounded-full border-2 border-[#6949FF] bg-white dark:bg-[#1F222A] hover:bg-[#F0EDFF] dark:hover:bg-[#2D2640] text-[#6949FF] font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95">
+            <button className="w-full h-[46px] rounded-full border-2 border-[#6949FF] bg-white dark:bg-[#1F222A] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] hover:text-white text-[#6949FF] font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95">
               Log In
             </button>
           </Link>

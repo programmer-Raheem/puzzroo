@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Lock, Calendar, Loader2 } from 'lucide-react'
+import { Lock, Calendar, Loader2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { generatePastPuzzles } from '@/lib/dailyChallenge/generator'
 import { getChallengeStatus, getAccessiblePastChallenges } from '@/lib/dailyChallenge/storage'
@@ -24,6 +24,7 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   const [filter, setFilter] = useState<'all' | 'not-started' | 'in-progress' | 'completed'>('all')
   const [showAccessModal, setShowAccessModal] = useState(false)
   const [showCalendarModal, setShowCalendarModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const accessibleCount = getAccessiblePastChallenges()
   const router = useRouter()
@@ -68,9 +69,32 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   }, [gameId, accessibleCount])
 
   // Filter puzzles
-  const filteredPuzzles = filter === 'all' 
-    ? puzzles 
-    : puzzles.filter(p => p.status === filter)
+  const filteredPuzzles = puzzles.filter(p => {
+    // If a date is selected, only show puzzles matching that date (including locked)
+    if (selectedDate) {
+      return p.dateString === selectedDate
+    }
+    
+    // If filter is 'all', show everything
+    if (filter === 'all') return true
+    
+    // If filter is 'not-started', show both not-started AND locked puzzles
+    if (filter === 'not-started') {
+      return p.status === 'not-started' || p.status === 'locked'
+    }
+    
+    // Otherwise, match the exact status
+    return p.status === filter
+  })
+
+  const handleDateSelected = (dateString: string) => {
+    setSelectedDate(dateString)
+    setShowCalendarModal(false)
+  }
+
+  const clearDateFilter = () => {
+    setSelectedDate(null)
+  }
 
   return (
     <>
@@ -93,18 +117,29 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
             <div className="flex flex-col gap-6">
 
               {/* Filter + Controls Container */}
-              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center flex-wrap">
                 <div className="w-full md:w-auto">
                   <FilterDropdown value={filter} onChange={setFilter} />
                 </div>
                 
                 <button 
-                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-[#1F222A] border-[1px] border-[#6949FF] text-[#6949FF] font-urbanist font-medium text-[14px] hover:bg-[#F0EDFF] dark:hover:bg-[#2D2640] transition-all"
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 h-[46px] md:h-auto md:py-2 rounded-lg bg-white dark:bg-[#1F222A] border-[1px] border-[#6949FF] text-[#6949FF] font-urbanist font-medium text-[14px] hover:bg-[#F0EDFF] dark:hover:bg-[#2D2640] transition-all"
                   onClick={() => setShowCalendarModal(true)}
                 >
                   <Calendar size={18} />
                   <span>Select Date</span>
                 </button>
+
+                {/* Clear Date Filter Button (if date selected) */}
+                {selectedDate && (
+                  <button 
+                    className="w-full md:w-auto flex items-center justify-center gap-2 px-4 h-[46px] md:h-auto md:py-2 rounded-lg bg-[#6949FF] text-white font-urbanist font-medium text-[14px] hover:bg-[#5536E6] transition-all"
+                    onClick={clearDateFilter}
+                  >
+                    <X size={18} />
+                    <span>Clear Date ({selectedDate})</span>
+                  </button>
+                )}
               </div>
 
               {/* Access Info Modal (always visible) */}
@@ -168,6 +203,7 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
         gameId={gameId}
+        onDateSelected={handleDateSelected}
       />
 
       {/* Loading Overlay */}
@@ -236,9 +272,10 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
           </div>
         </div>
 
-        {/* Content (visible but dimmed) */}
+        {/* Content (visible but dimmed) - SAME STRUCTURE AS UNLOCKED */}
         <div className="relative z-0 opacity-40">
-          <div className="flex justify-center mb-4">
+          {/* Top Icon */}
+          <div className="flex justify-center">
             <div className="w-20 h-20 bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl flex items-center justify-center">
               <Image
                 src={gameIcon}
@@ -250,29 +287,47 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
             </div>
           </div>
 
-          <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl px-3 py-2 text-center mb-4">
+          {/* Date Badge */}
+          <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl px-3 py-2 text-center mt-4">
             <p className="font-urbanist font-bold text-[11px] md:text-[12px] text-[#424242] dark:text-[#E0E0E0]">
               {puzzle.dateString}
             </p>
-            <p className="font-urbanist text-[10px] md:text-[11px] text-[#757575] dark:text-[#BDBDBD]">
+            <p className="font-urbanist font-bold text-[10px] md:text-[11px] text-[#757575] dark:text-[#BDBDBD]">
               {puzzle.dayName}
             </p>
           </div>
 
-          <div className="space-y-2 text-[11px] md:text-[12px]">
-            <div className="flex items-center justify-between py-1">
+          {/* Details */}
+          <div className="space-y-2 text-[11px] md:text-[12px] flex-1 mt-4">
+            <div className="flex items-center justify-between py-1 border-b border-[#F0F0F0] dark:border-[#35383F]">
               <span className="font-urbanist text-[#757575] dark:text-[#BDBDBD]">Difficulty</span>
               <span className="font-urbanist font-semibold text-[#424242] dark:text-[#E0E0E0] capitalize">
                 {puzzle.difficulty}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1">
+            <div className="flex items-center justify-between py-1 border-b border-[#F0F0F0] dark:border-[#35383F]">
               <span className="font-urbanist text-[#757575] dark:text-[#BDBDBD]">Shape</span>
               <span className="font-urbanist font-semibold text-[#424242] dark:text-[#E0E0E0] capitalize">
                 {puzzle.shape}
               </span>
             </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="font-urbanist text-[#757575] dark:text-[#BDBDBD]">Status</span>
+              <span className={`font-urbanist font-bold text-[11px] md:text-[12px] ${statusColors[puzzle.status]}`}>
+                {statusLabels[puzzle.status]}
+              </span>
+            </div>
           </div>
+
+          {/* Play Button - SAME AS UNLOCKED */}
+          <button
+            className="w-full h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-semibold text-[14px] md:text-[16px] transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 mt-4"
+          >
+            <span>Play Puzzle</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transform group-hover:translate-x-1 transition-transform">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
     )
@@ -289,11 +344,11 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
   }
 
   return (
-    <div className="bg-white dark:bg-[#1F222A] border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] rounded-2xl p-5 flex flex-col gap-4 hover:shadow-lg hover:shadow-purple-500/10 hover:border-[#6949FF] transition-all duration-300 group"
+    <div className="bg-white dark:bg-[#1F222A] border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] rounded-2xl p-5 flex flex-col gap-4 hover:border-[#6949FF] transition-all duration-300 group"
     >
       {/* Top Icon */}
       <div className="flex justify-center">
-        <div className="w-20 h-20 bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl flex items-center justify-center group-hover:bg-[#6949FF] transition-colors duration-300">
+        <div className="w-20 h-20 bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl flex items-center justify-center group-hover:shadow-md group-hover:shadow-purple-500/20 transition-shadow duration-300">
           <Image
             src={gameIcon}
             alt="Game Icon"
@@ -305,11 +360,11 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
       </div>
 
       {/* Date Badge */}
-      <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl px-3 py-2 text-center group-hover:bg-[#6949FF]/10 transition-colors duration-300">
+      <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl px-3 py-2 text-center transition-colors duration-300">
         <p className="font-urbanist font-bold text-[11px] md:text-[12px] text-[#424242] dark:text-[#E0E0E0]">
           {puzzle.dateString}
         </p>
-        <p className="font-urbanist text-[10px] md:text-[11px] text-[#757575] dark:text-[#BDBDBD]">
+        <p className="font-urbanist font-bold text-[10px] md:text-[11px] text-[#757575] dark:text-[#BDBDBD]">
           {puzzle.dayName}
         </p>
       </div>
@@ -339,7 +394,7 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
       {/* Play Button - CTA Style like Signup */}
       <button
         onClick={handleCardClick}
-        className="w-full h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-semibold text-[14px] md:text-[16px] transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+        className="w-full h-[37px] md:h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-semibold text-[14px] md:text-[16px] transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
       >
         <span>Play Puzzle</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="transform group-hover:translate-x-1 transition-transform">

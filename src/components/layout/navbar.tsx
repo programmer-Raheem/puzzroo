@@ -12,7 +12,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 w-full bg-white dark:bg-[#181A20] transition-colors duration-300 relative z-50">
-      <div className="w-full px-[20px] py-[8px] md:py-[22px]">
+      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[8px] md:py-[22px]">
         <div className="w-full flex items-center justify-between h-[48px]">
 
           {/* LEFT: Logo + Brand */}

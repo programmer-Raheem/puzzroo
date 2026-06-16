@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useGameLobby } from '@/contexts/GameLobbyContext'
 
 interface GameInfoProps {
   name: string
@@ -8,9 +9,35 @@ interface GameInfoProps {
   howToPlay: string
   bulletPoints: string[]
   keyboardControls: string
+  difficulty?: 'easy' | 'medium' | 'hard'
+  gameSlug?: string
 }
 
-export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControls }: GameInfoProps) {
+export function GameInfo({ 
+  name, 
+  about, 
+  howToPlay, 
+  bulletPoints, 
+  keyboardControls,
+  gameSlug
+}: GameInfoProps) {
+  // Get difficulty from context
+  const { selectedDifficulty } = useGameLobby()
+  
+  // Import dynamic instructions
+  const { getGameInstructions } = require('@/data/gameInstructions')
+  
+  // Use dynamic instructions if gameSlug is provided, otherwise use static howToPlay
+  const displayInstructions = gameSlug 
+    ? getGameInstructions(gameSlug, selectedDifficulty)
+    : howToPlay
+  
+  // Create difficulty-based heading
+  const difficultyText = selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)
+  const howToPlayHeading = gameSlug 
+    ? `How To Play ${difficultyText} Mode`
+    : `How To Play ${name}`
+
   return (
     <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 pt-0 pb-2 md:pt-2 ">
       <div className="w-full px-[20px]">
@@ -29,10 +56,10 @@ export function GameInfo({ name, about, howToPlay, bulletPoints, keyboardControl
           {/* How To Play Section */}
           <div className="flex flex-col gap-4">
             <h2 className="font-urbanist font-bold text-[20px] leading-[120%] text-[#424242] dark:text-white transition-colors duration-300">
-              How To Play {name}
+              {howToPlayHeading}
             </h2>
             <p className="font-urbanist font-medium text-[16px] leading-[140%] tracking-[0.2px] text-[#424242] dark:text-[#FAFAFA] transition-colors duration-300">
-              {howToPlay}
+              {displayInstructions}
             </p>
 
             {/* Bullet Points Container */}

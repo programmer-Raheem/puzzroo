@@ -84,7 +84,7 @@ export function DifficultyTabs({
             className="relative flex flex-col items-center gap-1.5 group z-10 flex-1 sm:flex-none"
           >
             <span
-              className={`font-urbanist font-bold text-[13px] sm:text-[14px] md:text-[16px] transition-all duration-700 ease-in-out px-2 sm:px-4 ${
+              className={`font-urbanist font-bold text-[12px] sm:text-[13px] md:text-[14px] transition-all duration-700 ease-in-out px-1.5 sm:px-3 ${
                 selected === index
                   ? 'text-[var(--color-primary)]'
                   : 'text-[#9E9E9E] group-hover:text-[#757575]'
@@ -93,7 +93,7 @@ export function DifficultyTabs({
               {difficulty}
             </span>
             {/* Grey background line */}
-            <div className="grey-line w-[68px] sm:w-[84px] md:w-[100px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
+            <div className="grey-line w-[64px] sm:w-[80px] md:w-[84px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
           </button>
         ))}
         

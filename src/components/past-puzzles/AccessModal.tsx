@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 
 interface AccessModalProps {
@@ -40,8 +41,7 @@ export function AccessModal({ isOpen, onClose, gameIcon }: AccessModalProps) {
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}>
         <div
-          className="bg-[#F0EDFF] dark:bg-[#1F222A] rounded-2xl shadow-2xl max-w-lg w-full relative transform transition-all duration-300"
-          style={{ height: '350px' }}
+          className="bg-white dark:bg-[#1F222A] rounded-2xl shadow-2xl max-w-lg w-full relative transform transition-all duration-300 p-8 border-[1.5px] border-[#E0E0E0] dark:border-[#35383F]"
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
@@ -49,51 +49,51 @@ export function AccessModal({ isOpen, onClose, gameIcon }: AccessModalProps) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/50 dark:hover:bg-black/20 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full hover:bg-[#F0EDFF] dark:hover:bg-[#35383F] transition-colors"
             aria-label="Close modal"
           >
             <X size={24} className="text-[#424242] dark:text-[#E0E0E0]" />
           </button>
 
-          {/* Content */}
-          <div className="h-full flex items-center p-8">
-            <div className="flex items-center gap-6 w-full">
-              {/* Left: Icon */}
-              <div className="flex-shrink-0">
-                <div className="bg-white dark:bg-[#35383F] rounded-2xl p-6">
-                  <Image
-                    src={gameIcon}
-                    alt="Game Icon"
-                    width={80}
-                    height={80}
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-
-              {/* Right: Text + Button */}
-              <div className="flex flex-col gap-6 flex-1">
-                <div className="space-y-3">
-                  <p className="font-urbanist text-[16px] md:text-[18px] font-semibold text-[#424242] dark:text-[#E0E0E0] leading-relaxed">
-                    <span className="font-bold text-[#6949FF]">Guest Access:</span> You can play the last 3 days of daily challenges
-                  </p>
-                  <p className="font-urbanist text-[16px] md:text-[18px] font-semibold text-[#424242] dark:text-[#E0E0E0] leading-relaxed">
-                    Register to unlock 7 days of daily challenges!
-                  </p>
-                </div>
-
-                <button 
-                  onClick={() => {
-                    // Handle registration navigation
-                    console.log('Navigate to registration')
-                    onClose()
-                  }}
-                  className="w-full h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
-                >
-                  Register Now
-                </button>
-              </div>
+          {/* Content - Vertical Layout */}
+          <div className="flex flex-col items-center gap-6 text-center">
+            {/* Icon */}
+            <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-2xl p-6">
+              <Image
+                src={gameIcon}
+                alt="Game Icon"
+                width={80}
+                height={80}
+                className="object-contain"
+              />
             </div>
+
+            {/* Status Badge */}
+            <div className="px-4 py-2 rounded-full bg-[#EEEEEE] dark:bg-[#35383F]">
+              <span className="font-urbanist font-bold text-[14px] text-[#757575] dark:text-[#BDBDBD]">
+                🔒 Locked
+              </span>
+            </div>
+
+            {/* Text Content */}
+            <div className="space-y-3">
+              <p className="font-urbanist text-[16px] md:text-[18px] font-semibold text-[#424242] dark:text-[#E0E0E0] leading-relaxed">
+                <span className="font-bold text-[#6949FF]">Guest Access:</span> You can play the last 3 days of daily challenges
+              </p>
+              <p className="font-urbanist text-[16px] md:text-[18px] font-semibold text-[#424242] dark:text-[#E0E0E0] leading-relaxed">
+                Register to unlock 7 days of daily challenges!
+              </p>
+            </div>
+
+            {/* Register Button */}
+            <Link href="/signup">
+              <button 
+                onClick={onClose}
+                className="w-full h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
+              >
+                Register Now
+              </button>
+            </Link>
           </div>
         </div>
       </div>

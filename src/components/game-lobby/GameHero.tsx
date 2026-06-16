@@ -7,15 +7,17 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { DifficultyTabs } from './DifficultyTabs'
 import { useTheme } from '@/hooks/use-theme'
+import { useGameLobby } from '@/contexts/GameLobbyContext'
 import { images } from '@/lib/utils'
 import type { Difficulty } from '@/data/sudoku/types'
-import { saveDifficultyPreference, loadDifficultyPreference } from '@/lib/sudoku/storage'
+import { saveDifficultyPreference } from '@/lib/sudoku/storage'
 
 interface GameHeroProps {
   name: string
   image: string
   imageLight?: string
   difficulties: string[]
+  gameSlug?: string
 }
 
 // Countdown Timer Hook
@@ -62,20 +64,20 @@ function useCurrentDate() {
   return dateString
 }
 
-export function GameHero({ name, image, imageLight, difficulties }: GameHeroProps) {
+export function GameHero({ name, image, imageLight, difficulties, gameSlug }: GameHeroProps) {
   const { theme } = useTheme()
   const router = useRouter()
+  const { setSelectedDifficulty } = useGameLobby()
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('easy')
+  const [localDifficulty, setLocalDifficulty] = useState<Difficulty>('easy')
   const timeLeft = useCountdownToMidnight()
   const currentDate = useCurrentDate()
   
-  // Load difficulty preference on mount (client-side only)
+  // Always reset to Easy on mount and update context
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = loadDifficultyPreference()
-      setSelectedDifficulty(saved)
-    }
+    setLocalDifficulty('easy')
+    setSelectedDifficulty('easy')
+    saveDifficultyPreference('easy')
   }, [])
 
   // Lock body scroll when loading overlay is active
@@ -101,6 +103,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
   const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/cross-math' : '#'
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
+    setLocalDifficulty(difficulty)
     setSelectedDifficulty(difficulty)
     saveDifficultyPreference(difficulty)
   }
@@ -111,7 +114,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
       setIsLoading(true)
       // Show loading for 2-3 seconds
       await new Promise(resolve => setTimeout(resolve, 2500))
-      router.push(`${playUrl}?difficulty=${selectedDifficulty.toLowerCase()}`)
+      router.push(`${playUrl}?difficulty=${localDifficulty.toLowerCase()}`)
     }
   }
 
@@ -140,7 +143,7 @@ export function GameHero({ name, image, imageLight, difficulties }: GameHeroProp
             {/* Difficulty Tabs */}
             <DifficultyTabs 
               difficulties={difficulties}
-              selectedDifficulty={selectedDifficulty}
+              selectedDifficulty={localDifficulty}
               onDifficultyChange={handleDifficultyChange}
             />
 
