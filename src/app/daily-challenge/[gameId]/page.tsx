@@ -8,10 +8,8 @@ import { useEffect, useState } from 'react'
 import { DailyChallenge } from '@/lib/dailyChallenge/types'
 import { SudokuGame } from '@/components/sudoku/SudokuGame'
 import { CrossMathGame } from '@/components/crossmath/CrossMathGame'
-import { GameHero } from '@/components/game-lobby/GameHero'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
-import { images } from '@/lib/utils'
 
 function DailyChallengeContent() {
   const params = useParams()
@@ -45,20 +43,10 @@ function DailyChallengeContent() {
     )
   }
 
-  // Get game details for hero
-  const gameName = gameId === 'sudoku' ? 'Sudoku' : gameId === 'cross-math' ? 'Cross Math' : gameId
-  const gameImage = gameId === 'sudoku' ? images.gameCards.sudoku : images.gameCards.crossWord
-  const difficulties = ['easy', 'medium', 'hard']
-
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-white dark:bg-[#181A20]">
-        <GameHero
-          name={gameName}
-          image={gameImage}
-          difficulties={difficulties}
-        />
         {gameId === 'sudoku' ? (
           <SudokuGame />
         ) : gameId === 'cross-math' ? (

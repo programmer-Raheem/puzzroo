@@ -153,14 +153,14 @@ function GameCardComponent({ game, isPlayed }: GameCardComponentProps) {
   if (!isActive) {
     return (
       <div className="flex flex-col bg-[#F0EDFF] dark:bg-[#1F222A] rounded-[6px] md:rounded-[12.31px] p-[12px] md:p-[20px] lg:p-[30.78px] gap-[12px] md:gap-[20px] lg:gap-[30.78px] opacity-60 cursor-not-allowed relative md:min-h-auto">
-        {/* Overlay effect */}
-        <div className="absolute inset-0 bg-gray-500/10 dark:bg-black/20 backdrop-blur-[2px] rounded-[6px] md:rounded-[12.31px] z-10 flex items-center justify-center">
-          <span className="font-urbanist font-bold text-[16px] md:text-[24px] lg:text-[32px] text-[#212121] dark:text-[#FAFAFA] bg-white/80 dark:bg-black/60 px-6 py-3 rounded-full backdrop-blur-sm">
+        {/* Overlay effect - NO BLUR */}
+        <div className="absolute inset-0 bg-gray-500/10 dark:bg-black/20 rounded-[6px] md:rounded-[12.31px] z-10 flex items-center justify-center">
+          <span className="font-urbanist font-bold text-[16px] md:text-[24px] lg:text-[32px] text-[#212121] dark:text-[#FAFAFA] bg-white/80 dark:bg-black/60 px-6 py-3 rounded-full">
             Coming Soon
           </span>
         </div>
         
-        {/* Game Image - Grayscale */}
+        {/* Game Image - Grayscale (no blur) */}
         <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-[#F0EDFF] dark:bg-[#1F222A] grayscale">
           <Image
             src={currentImage}
