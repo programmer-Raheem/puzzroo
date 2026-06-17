@@ -97,10 +97,11 @@ export function GameHero({ name, image, imageLight, difficulties, gameSlug }: Ga
   
   const currentImage = theme === 'light' && imageLight ? imageLight : image
   
-  // Check if this is Sudoku or CrossMath to link to the actual game page
+  // Check if this is Sudoku, CrossMath, or Nonogram to link to the actual game page
   const isSudoku = name.toLowerCase() === 'sudoku'
   const isCrossMath = name.toLowerCase() === 'cross math' || name.toLowerCase() === 'cross-math' || name.toLowerCase() === 'crossmath'
-  const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/cross-math' : '#'
+  const isNonogram = name.toLowerCase() === 'nonogram'
+  const playUrl = isSudoku ? '/sudoku' : isCrossMath ? '/cross-math' : isNonogram ? '/nonogram' : '#'
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
     setLocalDifficulty(difficulty)
@@ -109,7 +110,7 @@ export function GameHero({ name, image, imageLight, difficulties, gameSlug }: Ga
   }
 
   const handlePlayClick = async (e: React.MouseEvent) => {
-    if (isSudoku || isCrossMath) {
+    if (isSudoku || isCrossMath || isNonogram) {
       e.preventDefault()
       setIsLoading(true)
       // Show loading for 2-3 seconds
@@ -148,7 +149,7 @@ export function GameHero({ name, image, imageLight, difficulties, gameSlug }: Ga
             />
 
             {/* Play Button with Icon */}
-            {(isSudoku || isCrossMath) ? (
+            {(isSudoku || isCrossMath || isNonogram) ? (
               <button
                 onClick={handlePlayClick}
                 disabled={isLoading}
@@ -179,14 +180,14 @@ export function GameHero({ name, image, imageLight, difficulties, gameSlug }: Ga
             </div>
 
             {/* Daily Challenge Button - Full Width */}
-            <Link href={`/daily-challenge/${isSudoku ? 'sudoku' : isCrossMath ? 'cross-math' : 'sudoku'}`} className="w-full max-w-[382px]">
+            <Link href={`/daily-challenge/${isSudoku ? 'sudoku' : isCrossMath ? 'cross-math' : isNonogram ? 'nonogram' : 'sudoku'}`} className="w-full max-w-[382px]">
               <button className="w-full h-[46px] rounded-full border-2 border-[#6949FF] bg-[#6949FF] hover:bg-[#5536E6] hover:border-[#5536E6] text-white font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95">
                 Daily Challenge
               </button>
             </Link>
 
             {/* Past Puzzles Button - Full Width */}
-            <Link href={`/past-puzzles/${isSudoku ? 'sudoku' : isCrossMath ? 'cross-math' : 'sudoku'}`} className="w-full max-w-[382px]">
+            <Link href={`/past-puzzles/${isSudoku ? 'sudoku' : isCrossMath ? 'cross-math' : isNonogram ? 'nonogram' : 'sudoku'}`} className="w-full max-w-[382px]">
               <button className="w-full h-[46px] rounded-full border-2 border-[#6949FF] bg-white dark:bg-[#1F222A] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] hover:text-white font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95">
                 Past Puzzles
               </button>

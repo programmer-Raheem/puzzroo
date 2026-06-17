@@ -34,7 +34,7 @@ export function Navbar() {
           </div>
 
           {/* RIGHT: Desktop Actions */}
-          <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)] mr-[20px]">
+          <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)] -mr-[15px]">
 
             <Link href="/signup">
               <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
@@ -50,7 +50,7 @@ export function Navbar() {
 
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 h-[38px] px-[clamp(12px,2vw,16px)] rounded-full hover:opacity-80 transition-all duration-200 active:scale-95"
+              className="flex items-center justify-center gap-2 h-[38px] px-[clamp(12px,2vw,16px)] rounded-full hover:opacity-80 transition-all duration-200 active:scale-95"
               aria-label="Toggle theme"
               suppressHydrationWarning
             >

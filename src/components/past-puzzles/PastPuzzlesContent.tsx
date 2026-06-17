@@ -100,7 +100,7 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
     <>
       <Navbar />
       <section className="w-full min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300 py-4 md:pb-16">
-        <div className="w-full px-[20px] max-w-[1200px] mx-auto">
+        <div className="w-full px-[20px] max-w-[1380px] mx-auto">
           
           {/* Header - OUTSIDE the bordered container */}
           <div className="text-center md:mb-8 mb-3">

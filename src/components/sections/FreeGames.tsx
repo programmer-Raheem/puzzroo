@@ -16,7 +16,7 @@ interface GameCard {
 }
 
 // Active games that are fully implemented
-const ACTIVE_GAMES = ['sudoku', 'cross-math']
+const ACTIVE_GAMES = ['sudoku', 'cross-math', 'nonogram']
 
 const gamesData: GameCard[] = [
   {
