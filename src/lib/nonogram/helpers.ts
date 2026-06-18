@@ -190,10 +190,10 @@ export function isCellMistake(grid: CellState[][], solution: number[][], positio
   const { row, col } = position
   const shouldBeFilled = solution[row][col] === 1
   const isFilled = grid[row][col] === 'filled'
-  const isCrossed = grid[row][col] === 'crossed'
+  const isMarked = grid[row][col] === 'marked'
   
-  // Mistake if filled when should be empty, or crossed when should be filled
-  return (shouldBeFilled && isCrossed) || (!shouldBeFilled && isFilled)
+  // Mistake if filled when should be empty, or marked when should be filled
+  return (shouldBeFilled && isMarked) || (!shouldBeFilled && isFilled)
 }
 
 /**

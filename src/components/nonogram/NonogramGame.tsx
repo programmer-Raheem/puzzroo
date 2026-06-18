@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, Flag } from 'lucide-react'
 import { useNonogram } from '@/hooks/useNonogram'
 import { NonogramModal } from './NonogramModal'
+import { InputModeToolbar } from '@/components/games/nonogram/InputModeToolbar'
 import { formatTime } from '@/lib/nonogram/helpers'
 import type { CellPosition } from '@/lib/nonogram/types'
 
@@ -22,14 +23,26 @@ export function NonogramGame() {
     progress,
     hintsUsed,
     maxHints,
-    mistakeCell,
+    errorCell,
+    isDragging,
+    dragPreviewCells,
+    inputMode,
     handleCellClick,
+    handleDragStart,
+    handleDragEnter,
+    handleDragEnd,
     resetPuzzle,
     newPuzzle,
     useHint,
+    autoFill,
+    setInputMode,
   } = useNonogram()
 
   const [windowWidth, setWindowWidth] = useState(0)
+  const [zoomLevel, setZoomLevel] = useState(1) // 1 = 100%, 0.6 = 60%, 1.5 = 150%
+  const [isPinching, setIsPinching] = useState(false)
+  const initialPinchDistance = useRef<number>(0)
+  const initialZoomLevel = useRef<number>(1)
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth)
@@ -38,29 +51,120 @@ export function NonogramGame() {
     return () => window.removeEventListener('resize', updateWidth)
   }, [])
 
-  // Dynamic cell sizing based on screen width and difficulty
+  // Pinch zoom handler
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        setIsPinching(true)
+        const touch1 = e.touches[0]
+        const touch2 = e.touches[1]
+        const distance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        )
+        initialPinchDistance.current = distance
+        initialZoomLevel.current = zoomLevel
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isPinching && e.touches.length === 2) {
+        e.preventDefault()
+        const touch1 = e.touches[0]
+        const touch2 = e.touches[1]
+        const distance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        )
+        const scale = distance / initialPinchDistance.current
+        const newZoom = Math.max(0.6, Math.min(1.5, initialZoomLevel.current * scale))
+        setZoomLevel(newZoom)
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        setIsPinching(false)
+      }
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: false })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd)
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isPinching, zoomLevel])
+
+  // Dynamic cell sizing based on screen width and difficulty with zoom
   const cellSize = useMemo(() => {
     if (!currentPuzzle || windowWidth === 0) return 32
     
-    const availableWidth = Math.min(windowWidth - 80, 717.5)
     const gridSize = currentPuzzle.size
-    const clueWidth = 64
-    const borderSpace = 20
-    const maxBoardWidth = availableWidth - clueWidth - borderSpace
+    const padding = 40 // Container padding
+    const borderSpace = 8 // Border thickness and spacing
+    const availableWidth = windowWidth - padding
     
-    const calculatedSize = Math.floor(maxBoardWidth / gridSize)
+    // Calculate max row clue width
+    const maxRowClueCount = Math.max(...currentPuzzle.rowClues.map(c => c.values.length), 1)
+    const maxColClueCount = Math.max(...currentPuzzle.columnClues.map(c => c.values.length), 1)
     
-    if (windowWidth < 768) {
-      return Math.max(20, Math.min(28, calculatedSize))
+    // Estimate clue sizes - they should scale with cell size
+    let baseSize: number
+    
+    if (windowWidth < 640) {
+      // Mobile: need to fit everything without horizontal scroll
+      // For hard puzzles (20x20), cells need to be smaller
+      let clueWidthPerCount = gridSize >= 20 ? 16 : (gridSize >= 15 ? 18 : 22)
+      const maxClueWidth = maxRowClueCount * clueWidthPerCount
+      const availableForGrid = availableWidth - maxClueWidth - borderSpace
+      baseSize = Math.floor(availableForGrid / gridSize)
+      
+      // Minimum sizes based on grid size
+      if (gridSize >= 20) {
+        baseSize = Math.max(14, Math.min(20, baseSize)) // Hard: 14-20px
+      } else if (gridSize >= 15) {
+        baseSize = Math.max(16, Math.min(22, baseSize)) // Medium: 16-22px
+      } else {
+        baseSize = Math.max(20, Math.min(26, baseSize)) // Easy: 20-26px
+      }
+    } else if (windowWidth < 768) {
+      // Small tablet
+      let clueWidthPerCount = gridSize >= 20 ? 20 : (gridSize >= 15 ? 22 : 26)
+      const maxClueWidth = maxRowClueCount * clueWidthPerCount
+      const availableForGrid = availableWidth - maxClueWidth - borderSpace
+      baseSize = Math.floor(availableForGrid / gridSize)
+      
+      if (gridSize >= 20) {
+        baseSize = Math.max(18, Math.min(24, baseSize))
+      } else if (gridSize >= 15) {
+        baseSize = Math.max(20, Math.min(26, baseSize))
+      } else {
+        baseSize = Math.max(24, Math.min(30, baseSize))
+      }
     } else if (windowWidth < 1024) {
-      return Math.max(28, Math.min(34, calculatedSize))
+      // Tablet
+      const maxClueWidth = maxRowClueCount * 30
+      const availableForGrid = Math.min(availableWidth, 717.5) - maxClueWidth - borderSpace
+      baseSize = Math.floor(availableForGrid / gridSize)
+      baseSize = Math.max(24, Math.min(34, baseSize))
     } else {
-      return Math.max(32, Math.min(40, calculatedSize))
+      // Desktop
+      const maxClueWidth = maxRowClueCount * 34
+      const availableForGrid = Math.min(availableWidth, 717.5) - maxClueWidth - borderSpace
+      baseSize = Math.floor(availableForGrid / gridSize)
+      baseSize = Math.max(26, Math.min(40, baseSize))
     }
-  }, [currentPuzzle, windowWidth])
+    
+    // Apply zoom level
+    return Math.floor(baseSize * zoomLevel)
+  }, [currentPuzzle, windowWidth, zoomLevel])
 
   const handleBackToGames = () => {
-    router.push('/game/nonogram')
+    router.push('/#free-games')
   }
 
   if (!isInitialized || !currentPuzzle) {
@@ -78,6 +182,7 @@ export function NonogramGame() {
   const maxRowClueCount = Math.max(...currentPuzzle.rowClues.map(c => c.values.length), 1)
   const maxColClueCount = Math.max(...currentPuzzle.columnClues.map(c => c.values.length), 1)
   
+  // Clue size should also scale with zoom
   const clueSize = cellSize
   const cornerWidth = maxRowClueCount * clueSize
   const cornerHeight = maxColClueCount * clueSize
@@ -86,9 +191,9 @@ export function NonogramGame() {
 
   return (
     <>
-      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300">
-        <div className="w-full px-[20px] py-[40px] flex justify-center">
-          <div className="w-full max-w-[717.5px] flex flex-col items-center gap-[20px]">
+      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 overflow-x-hidden">
+        <div className="w-full px-[20px] py-[40px] flex justify-center overflow-x-hidden">
+          <div className="w-full max-w-[717.5px] flex flex-col items-center gap-[20px] overflow-x-hidden">
             
             {/* Timer and Progress Bar */}
             <div className="w-full flex flex-col gap-3">
@@ -125,9 +230,56 @@ export function NonogramGame() {
               </div>
             </div>
 
+            {/* Zoom Controls */}
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setZoomLevel(Math.max(0.6, zoomLevel - 0.1))}
+                className="w-8 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] hover:bg-[#D4C5F9] dark:hover:bg-[#4A3A8C] text-[#6949FF] dark:text-[#A592FF] flex items-center justify-center transition-all duration-200 active:scale-95"
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                  <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </button>
+              <span className="font-urbanist text-[12px] font-medium text-[#616161] dark:text-[#A0A4B8] min-w-[45px] text-center">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => setZoomLevel(Math.min(1.5, zoomLevel + 0.1))}
+                className="w-8 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] hover:bg-[#D4C5F9] dark:hover:bg-[#4A3A8C] text-[#6949FF] dark:text-[#A592FF] flex items-center justify-center transition-all duration-200 active:scale-95"
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                  <line x1="11" y1="8" x2="11" y2="14"/>
+                  <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </button>
+              <button
+                onClick={() => setZoomLevel(1)}
+                className="ml-1 px-2 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] hover:bg-[#D4C5F9] dark:hover:bg-[#4A3A8C] font-urbanist text-[11px] font-medium text-[#6949FF] dark:text-[#A592FF] transition-all duration-200 active:scale-95"
+                title="Reset zoom"
+              >
+                Reset
+              </button>
+            </div>
+
+            {/* Input Mode Toolbar */}
+            <InputModeToolbar
+              activeMode={inputMode}
+              onModeChange={setInputMode}
+              disabled={gameStatus !== 'playing'}
+              maxWidth={cornerWidth + (currentPuzzle.size * cellSize)}
+            />
+
             {/* Game Board */}
-            <div className="w-full overflow-x-auto flex justify-center">
-              <div className="inline-flex flex-col border-2 border-[#D0D3DC] dark:border-[#616161]">
+            <div className="w-full flex justify-center overflow-x-auto">
+              <div className="inline-flex flex-col border-2 border-[#D0D3DC] dark:border-[#616161]" style={{ maxWidth: '100%' }}>
                 
                 {/* Top: Corner + Column Clues */}
                 <div className="flex">
@@ -156,13 +308,22 @@ export function NonogramGame() {
                               ? 'text-white'
                               : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
                             
+                            // Responsive font size based on digit count and cell size
+                            const digitCount = displayValue.toString().length
+                            const fontSize = digitCount >= 2 
+                              ? Math.max(9, Math.min(12, cellSize * 0.45))
+                              : Math.max(11, Math.min(14, cellSize * 0.55))
+                            
                             return (
                               <div
                                 key={vIdx}
                                 className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
                                 style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                               >
-                                <span className={`font-urbanist text-[12px] sm:text-[13px] md:text-[14px] font-bold ${textColor}`}>
+                                <span 
+                                  className={`font-urbanist font-bold ${textColor}`}
+                                  style={{ fontSize: `${fontSize}px` }}
+                                >
                                   {displayValue}
                                 </span>
                               </div>
@@ -196,13 +357,22 @@ export function NonogramGame() {
                               ? 'text-white'
                               : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
                             
+                            // Responsive font size based on digit count and cell size
+                            const digitCount = displayValue.toString().length
+                            const fontSize = digitCount >= 2 
+                              ? Math.max(9, Math.min(12, cellSize * 0.45))
+                              : Math.max(11, Math.min(14, cellSize * 0.55))
+                            
                             return (
                               <div
                                 key={vIdx}
                                 className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
                                 style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                               >
-                                <span className={`font-urbanist text-[12px] sm:text-[13px] md:text-[14px] font-bold ${textColor}`}>
+                                <span 
+                                  className={`font-urbanist font-bold ${textColor}`}
+                                  style={{ fontSize: `${fontSize}px` }}
+                                >
                                   {displayValue}
                                 </span>
                               </div>
@@ -213,15 +383,30 @@ export function NonogramGame() {
                     })}
                   </div>
 
-                  <div className="grid" style={{
-                    gridTemplateColumns: `repeat(${currentPuzzle.size}, ${cellSize}px)`,
-                    gridTemplateRows: `repeat(${currentPuzzle.size}, ${cellSize}px)`,
-                  }}>
+                  <div 
+                    className="grid" 
+                    style={{
+                      gridTemplateColumns: `repeat(${currentPuzzle.size}, ${cellSize}px)`,
+                      gridTemplateRows: `repeat(${currentPuzzle.size}, ${cellSize}px)`,
+                      touchAction: 'none',
+                    }}
+                    onPointerUp={handleDragEnd}
+                    onPointerLeave={handleDragEnd}
+                    onPointerCancel={handleDragEnd}
+                  >
                     {grid.map((row, rowIdx) =>
                       row.map((cellState, colIdx) => {
                         const position: CellPosition = { row: rowIdx, col: colIdx }
                         const isSelected = selectedCell?.row === rowIdx && selectedCell?.col === colIdx
-                        const isMistake = mistakeCell?.row === rowIdx && mistakeCell?.col === colIdx
+                        const isError = errorCell?.row === rowIdx && errorCell?.col === colIdx
+                        const cellKey = `${rowIdx}-${colIdx}`
+                        const isInDragPreview = dragPreviewCells.has(cellKey) && cellState === 'empty'
+                        
+                        // Check if this row and column are both completed
+                        const isRowCompleted = rowValidation[rowIdx] === 'completed'
+                        const isColCompleted = columnValidation[colIdx] === 'completed'
+                        const shouldBeEmpty = currentPuzzle.solution[rowIdx][colIdx] === 0
+                        const showCompletedEmpty = (isRowCompleted || isColCompleted) && shouldBeEmpty && cellState === 'empty'
                         
                         const hasThickRight = (colIdx + 1) % 5 === 0 && colIdx !== currentPuzzle.size - 1
                         const hasThickBottom = (rowIdx + 1) % 5 === 0 && rowIdx !== currentPuzzle.size - 1
@@ -229,34 +414,76 @@ export function NonogramGame() {
                         let bgClass = ''
                         let borderClass = ''
                         
-                        if (isMistake) {
-                          borderClass = 'ring-2 ring-red-500 ring-inset'
-                        }
-                        
-                        if (cellState === 'filled') {
-                          bgClass = 'bg-[#2F6FED]'
-                        } else if (cellState === 'crossed') {
+                        if (isInDragPreview) {
+                          // Light purple preview during drag
+                          bgClass = 'bg-[#A592FF] dark:bg-[#7C6BAE]'
+                        } else if (isError || cellState === 'error') {
                           bgClass = 'bg-white dark:bg-[#181A20]'
+                          borderClass = 'ring-2 ring-red-500 ring-inset'
+                        } else if (cellState === 'filled') {
+                          bgClass = 'bg-[#000000] dark:bg-[#0A0A0A]'
+                        } else if (cellState === 'marked') {
+                          bgClass = 'bg-white dark:bg-[#181A20]'
+                        } else if (showCompletedEmpty) {
+                          // Light gray for empty cells in completed rows/columns
+                          bgClass = 'bg-[#E8E8E8] dark:bg-[#2A2D35]'
                         } else if (isSelected) {
-                          bgClass = 'bg-[#A592FF]'
+                          bgClass = 'bg-[#E8DFFF] dark:bg-[#3D2F7A]'
                         } else {
-                          bgClass = 'bg-white dark:bg-[#181A20] hover:bg-[#E8DFFF] dark:hover:bg-[#35383F]'
+                          bgClass = 'bg-white dark:bg-[#181A20] hover:bg-[#F5F6FA] dark:hover:bg-[#35383F]'
                         }
 
                         return (
                           <button
                             key={`cell-${rowIdx}-${colIdx}`}
-                            onClick={() => handleCellClick(position)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              if (!isDragging && !isPinching) {
+                                handleCellClick(position)
+                              }
+                            }}
+                            onPointerDown={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              if (!isPinching) {
+                                handleDragStart(position)
+                              }
+                            }}
+                            onPointerEnter={(e) => {
+                              if (!isPinching && isDragging) {
+                                handleDragEnter(position)
+                              }
+                            }}
+                            onPointerMove={(e) => {
+                              if (!isPinching && isDragging) {
+                                handleDragEnter(position)
+                              }
+                            }}
                             disabled={gameStatus !== 'playing'}
                             className={`flex items-center justify-center border-[1px] border-[#D0D3DC] dark:border-[#616161] ${bgClass} ${borderClass} ${
                               hasThickRight ? 'border-r-[3px] border-r-[#2B2F3A] dark:border-r-[#FAFAFA]' : ''
-                            } ${hasThickBottom ? 'border-b-[3px] border-b-[#2B2F3A] dark:border-b-[#FAFAFA]' : ''} transition-all duration-150 cursor-crosshair focus:outline-none focus:ring-2 focus:ring-[#A592FF] disabled:cursor-not-allowed disabled:opacity-70`}
-                            style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+                            } ${hasThickBottom ? 'border-b-[3px] border-b-[#2B2F3A] dark:border-b-[#FAFAFA]' : ''} transition-colors duration-150 cursor-crosshair focus:outline-none focus:ring-2 focus:ring-[#6949FF] disabled:cursor-not-allowed disabled:opacity-70 select-none cell-flip-container`}
+                            style={{ 
+                              width: `${cellSize}px`, 
+                              height: `${cellSize}px`, 
+                              touchAction: 'none',
+                              transformStyle: 'preserve-3d',
+                              perspective: '1000px',
+                            }}
                             aria-label={`Cell row ${rowIdx + 1}, column ${colIdx + 1}, ${cellState}`}
                           >
-                            {cellState === 'crossed' && (
-                              <svg width={cellSize * 0.5} height={cellSize * 0.5} viewBox="0 0 16 16" fill="none">
-                                <path d="M2 2L14 14M14 2L2 14" stroke="#A0A4B8" strokeWidth="2" strokeLinecap="round" />
+                            {/* Show red flag for marked cells OR when in preview with mark mode */}
+                            {((cellState === 'marked' && !isInDragPreview) || (isInDragPreview && inputMode === 'mark')) && (
+                              <Flag 
+                                size={cellSize * 0.5} 
+                                className="pointer-events-none text-[#EF4444]"
+                                fill="#EF4444"
+                              />
+                            )}
+                            {/* Show error X */}
+                            {(cellState === 'error' || isError) && !isInDragPreview && (
+                              <svg width={cellSize * 0.5} height={cellSize * 0.5} viewBox="0 0 16 16" fill="none" className="pointer-events-none">
+                                <path d="M2 2L14 14M14 2L2 14" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
                               </svg>
                             )}
                           </button>
@@ -269,27 +496,50 @@ export function NonogramGame() {
             </div>
 
             {/* Controls */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[500px]">
+            <div 
+              className="flex flex-row gap-2 w-full justify-center items-center flex-wrap"
+              style={{ 
+                maxWidth: `${Math.max(320, cornerWidth + (currentPuzzle.size * cellSize))}px`,
+                minWidth: '280px'
+              }}
+            >
+              {/* Hint Button - Icon only */}
               <button
                 onClick={useHint}
                 disabled={!canUseHint}
-                className="flex-1 h-[46px] rounded-full bg-[#FFA726] hover:bg-[#FB8C00] disabled:bg-gray-300 dark:disabled:bg-[#424242] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-[46px] h-[46px] rounded-full bg-[#F5F6FA] dark:bg-[#35383F] hover:bg-[#E8DFFF] dark:hover:bg-[#424242] disabled:bg-gray-300 dark:disabled:bg-[#2A2D35] text-[#6949FF] dark:text-[#8B6EFF] disabled:text-gray-400 font-urbanist font-bold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center relative"
                 aria-label={`Use hint, ${maxHints - hintsUsed} remaining`}
+                title={`Hint (${maxHints - hintsUsed})`}
               >
                 <Lightbulb size={20} />
-                Hint ({maxHints - hintsUsed})
+                {hintsUsed < maxHints && (
+                  <span className="absolute -top-1 -right-1 bg-[#6949FF] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {maxHints - hintsUsed}
+                  </span>
+                )}
+              </button>
+
+              {/* AutoFill Button - For Testing */}
+              <button
+                onClick={autoFill}
+                className="px-3 h-[46px] rounded-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-urbanist font-bold text-[13px] transition-all duration-200 active:scale-95"
+                title="Auto-fill solution (testing)"
+              >
+                Auto
               </button>
               
+              {/* Reset Button */}
               <button
                 onClick={resetPuzzle}
-                className="flex-1 h-[46px] rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-[#35383F] dark:hover:bg-[#424242] text-[#2B2F3A] dark:text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95"
+                className="flex-1 h-[46px] rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] hover:bg-[#D4C5F9] dark:hover:bg-[#4A3A8C] text-[#6949FF] dark:text-white font-urbanist font-bold text-[15px] transition-all duration-200 active:scale-95"
               >
                 Reset
               </button>
               
+              {/* New Puzzle Button */}
               <button
                 onClick={newPuzzle}
-                className="flex-1 h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95"
+                className="flex-1 h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[15px] transition-all duration-200 active:scale-95"
               >
                 New Puzzle
               </button>
@@ -298,7 +548,7 @@ export function NonogramGame() {
             {/* Keyboard Instructions */}
             <div className="text-center mt-4">
               <p className="font-urbanist text-[12px] text-[#616161] dark:text-[#A0A4B8]">
-                Use arrow keys to navigate • Space/Enter to toggle • Backspace to clear
+                <strong>F</strong>: Fill Mode • <strong>M</strong>: Mark Mode • Click/Drag to interact • Arrow keys to navigate • <strong>Space</strong>: Apply mode • Backspace to clear
               </p>
             </div>
 

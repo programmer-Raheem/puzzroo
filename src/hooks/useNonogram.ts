@@ -1,6 +1,6 @@
 /**
- * Nonogram State Hook - Phase 2 Complete
- * Game logic, validation, completion detection, and progress tracking
+ * Nonogram State Hook - Phase 3: Input Mode System
+ * Game logic with explicit Fill/Mark mode system and flip animation
  */
 
 'use client'
@@ -15,8 +15,12 @@ import {
   ValidationStatus,
   GameStatus,
   GameProgress,
-  HintState,
+  InputMode,
+  ValidationMode,
 } from '@/lib/nonogram/types'
+
+// Drag state types
+type DragDirection = 'horizontal' | 'vertical' | null
 import { 
   createEmptyGrid,
   checkPuzzleCompletion,
@@ -45,6 +49,10 @@ export function useNonogram() {
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
   
+  // Phase 3: Input mode system
+  const [inputMode, setInputMode] = useState<InputMode>('fill')
+  const [validationMode, setValidationMode] = useState<ValidationMode>('assisted')
+  
   // Phase 2: Game state
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing')
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -57,7 +65,14 @@ export function useNonogram() {
   })
   const [hintsUsed, setHintsUsed] = useState(0)
   const [maxHints, setMaxHints] = useState(5)
-  const [mistakeCell, setMistakeCell] = useState<CellPosition | null>(null)
+  const [errorCell, setErrorCell] = useState<CellPosition | null>(null)
+  
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragDirection, setDragDirection] = useState<DragDirection>(null)
+  const [dragPreviewCells, setDragPreviewCells] = useState<Set<string>>(new Set())
+  const dragStartPos = useRef<CellPosition | null>(null)
+  const visitedCells = useRef<Set<string>>(new Set())
   
   // Timer ref
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -101,6 +116,7 @@ export function useNonogram() {
       correctCellsFilled: 0,
       percentComplete: 0,
     })
+    setInputMode('fill')
     startTimeRef.current = null
   }, [])
 
@@ -191,36 +207,194 @@ export function useNonogram() {
   }, [grid, currentPuzzle, gameStatus, elapsedSeconds])
 
   /**
-   * Handle cell click - cycle through states: empty -> filled -> crossed -> empty
+   * Apply cell action based on input mode
+   */
+  const applyCellAction = useCallback((position: CellPosition, mode: InputMode): CellState => {
+    const currentState = grid[position.row][position.col]
+    
+    if (mode === 'fill') {
+      // Fill Mode: empty <-> filled
+      return currentState === 'filled' ? 'empty' : 'filled'
+    } else {
+      // Mark Mode: empty <-> marked
+      return currentState === 'marked' ? 'empty' : 'marked'
+    }
+  }, [grid])
+
+  /**
+   * Handle cell click - apply action based on active input mode
    */
   const handleCellClick = useCallback((position: CellPosition) => {
-    if (gameStatus !== 'playing' || !currentPuzzle) return
+    if (gameStatus !== 'playing' || !currentPuzzle || isDragging) return
     
     setSelectedCell(position)
     
+    const newState = applyCellAction(position, inputMode)
+    
+    // Validate if not returning to empty and assisted mode is on
+    if (newState !== 'empty' && validationMode === 'assisted') {
+      const tempGrid = grid.map(row => [...row])
+      tempGrid[position.row][position.col] = newState
+      const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
+      
+      if (isMistake) {
+        // Show error feedback with shake
+        setGrid((prevGrid) => {
+          const newGrid = prevGrid.map((row) => [...row])
+          newGrid[position.row][position.col] = 'error'
+          return newGrid
+        })
+        
+        // Revert after shake animation (1 second)
+        setTimeout(() => {
+          setGrid((prevGrid) => {
+            const newGrid = prevGrid.map((row) => [...row])
+            newGrid[position.row][position.col] = 'empty'
+            return newGrid
+          })
+        }, 1000)
+        return
+      }
+    }
+    
     setGrid((prevGrid) => {
       const newGrid = prevGrid.map((row) => [...row])
-      const currentState = newGrid[position.row][position.col]
-      
-      // Cycle: empty -> filled -> crossed -> empty
-      if (currentState === 'empty') {
-        newGrid[position.row][position.col] = 'filled'
-      } else if (currentState === 'filled') {
-        newGrid[position.row][position.col] = 'crossed'
-      } else {
-        newGrid[position.row][position.col] = 'empty'
-      }
-      
-      // Check if this is a mistake (optional: for assisted mode)
-      const isMistake = isCellMistake(newGrid, currentPuzzle.solution, position)
-      if (isMistake && newGrid[position.row][position.col] !== 'empty') {
-        setMistakeCell(position)
-        setTimeout(() => setMistakeCell(null), 1000)
-      }
-      
+      newGrid[position.row][position.col] = newState
       return newGrid
     })
+  }, [currentPuzzle, gameStatus, isDragging, inputMode, applyCellAction, validationMode, grid])
+
+  /**
+   * Drag handlers - for drag fill, drag cross, and drag erase
+   */
+  
+  // Helper: Create cell key for visited tracking
+  const getCellKey = (position: CellPosition): string => {
+    return `${position.row}-${position.col}`
+  }
+
+  // Helper: Determine drag direction
+  const determineDragDirection = (
+    start: CellPosition,
+    current: CellPosition
+  ): DragDirection => {
+    const rowDiff = Math.abs(current.row - start.row)
+    const colDiff = Math.abs(current.col - start.col)
+    
+    if (rowDiff === 0 && colDiff === 0) return null
+    
+    // Lock to dominant direction
+    if (rowDiff > colDiff) return 'vertical'
+    if (colDiff > rowDiff) return 'horizontal'
+    
+    // Equal movement - keep previous direction or default to horizontal
+    return dragDirection || 'horizontal'
+  }
+
+  // Start drag
+  const handleDragStart = useCallback((position: CellPosition) => {
+    if (gameStatus !== 'playing' || !currentPuzzle) return
+    
+    setIsDragging(true)
+    setDragDirection(null)
+    dragStartPos.current = position
+    visitedCells.current = new Set([getCellKey(position)])
+    
+    // Show preview for starting cell
+    setDragPreviewCells(new Set([getCellKey(position)]))
   }, [currentPuzzle, gameStatus])
+
+  // Continue drag
+  const handleDragEnter = useCallback((position: CellPosition) => {
+    if (!isDragging || !dragStartPos.current || !currentPuzzle) return
+    
+    const cellKey = getCellKey(position)
+    
+    // Skip if already visited
+    if (visitedCells.current.has(cellKey)) return
+    
+    // Determine and enforce direction lock
+    const direction = determineDragDirection(dragStartPos.current, position)
+    
+    // Set direction on first move
+    if (dragDirection === null && direction !== null) {
+      setDragDirection(direction)
+    }
+    
+    // Enforce direction lock - only update cells in locked direction
+    const currentDirection = dragDirection || direction
+    if (currentDirection === 'horizontal' && position.row !== dragStartPos.current.row) {
+      return // Ignore cells outside locked row
+    }
+    if (currentDirection === 'vertical' && position.col !== dragStartPos.current.col) {
+      return // Ignore cells outside locked column
+    }
+    
+    // Mark as visited
+    visitedCells.current.add(cellKey)
+    
+    // Add to preview cells
+    setDragPreviewCells((prev) => new Set([...prev, cellKey]))
+  }, [isDragging, dragDirection, currentPuzzle])
+
+  // End drag - apply changes with sequential flip animation
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging) return
+    
+    const cellsToUpdate = Array.from(visitedCells.current)
+    
+    // Apply changes sequentially with 30ms stagger for flip effect
+    cellsToUpdate.forEach((cellKey, index) => {
+      setTimeout(() => {
+        const [rowStr, colStr] = cellKey.split('-')
+        const position: CellPosition = { row: parseInt(rowStr), col: parseInt(colStr) }
+        
+        const newState = applyCellAction(position, inputMode)
+        
+        // Validate if not returning to empty
+        if (newState !== 'empty' && validationMode === 'assisted' && currentPuzzle) {
+          const tempGrid = grid.map(row => [...row])
+          tempGrid[position.row][position.col] = newState
+          const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
+          
+          if (isMistake) {
+            // Show error feedback with shake
+            setGrid((prevGrid) => {
+              const newGrid = prevGrid.map((row) => [...row])
+              newGrid[position.row][position.col] = 'error'
+              return newGrid
+            })
+            
+            // Revert after shake animation
+            setTimeout(() => {
+              setGrid((prevGrid) => {
+                const newGrid = prevGrid.map((row) => [...row])
+                newGrid[position.row][position.col] = 'empty'
+                return newGrid
+              })
+            }, 1000)
+            return
+          }
+        }
+        
+        // Apply the state change
+        setGrid((prevGrid) => {
+          const newGrid = prevGrid.map((row) => [...row])
+          newGrid[position.row][position.col] = newState
+          return newGrid
+        })
+      }, index * 30)
+    })
+    
+    // Clean up drag state after all animations start
+    setTimeout(() => {
+      setIsDragging(false)
+      setDragDirection(null)
+      setDragPreviewCells(new Set())
+      dragStartPos.current = null
+      visitedCells.current.clear()
+    }, cellsToUpdate.length * 30 + 100)
+  }, [isDragging, inputMode, applyCellAction, validationMode, currentPuzzle, grid])
 
   /**
    * Reset the current puzzle
@@ -235,6 +409,7 @@ export function useNonogram() {
       setGameStatus('playing')
       setRowValidation(Array(currentPuzzle.size).fill('incomplete'))
       setColumnValidation(Array(currentPuzzle.size).fill('incomplete'))
+      setInputMode('fill')
       startTimeRef.current = null
       clearGameState()
     }
@@ -276,12 +451,42 @@ export function useNonogram() {
   }, [currentPuzzle, grid, gameStatus, hintsUsed, maxHints])
 
   /**
-   * Keyboard navigation
+   * Auto-fill - fill all cells correctly (for testing)
+   */
+  const autoFill = useCallback(() => {
+    if (!currentPuzzle || gameStatus !== 'playing') return
+
+    setGrid((prevGrid) => {
+      const newGrid = prevGrid.map((row, rowIdx) =>
+        row.map((_, colIdx) => {
+          return currentPuzzle.solution[rowIdx][colIdx] === 1 ? 'filled' : 'empty'
+        })
+      )
+      return newGrid
+    })
+  }, [currentPuzzle, gameStatus])
+
+  /**
+   * Keyboard controls with input mode support
    */
   useEffect(() => {
     if (gameStatus !== 'playing' || !currentPuzzle) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // F key - switch to Fill mode
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault()
+        setInputMode('fill')
+        return
+      }
+
+      // M key - switch to Mark mode
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
+        setInputMode('mark')
+        return
+      }
+
       // Arrow keys for navigation
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault()
@@ -312,8 +517,8 @@ export function useNonogram() {
         setSelectedCell({ row: newRow, col: newCol })
       }
 
-      // Space or Enter to toggle cell
-      if (selectedCell && (e.key === ' ' || e.key === 'Enter')) {
+      // Space - Apply active mode
+      if (selectedCell && e.key === ' ') {
         e.preventDefault()
         handleCellClick(selectedCell)
       }
@@ -347,13 +552,23 @@ export function useNonogram() {
     progress,
     hintsUsed,
     maxHints,
-    mistakeCell,
+    errorCell,
+    isDragging,
+    dragPreviewCells,
+    inputMode,
+    validationMode,
 
     // Actions
     handleCellClick,
+    handleDragStart,
+    handleDragEnter,
+    handleDragEnd,
     resetPuzzle,
     newPuzzle,
     changeDifficulty,
     useHint,
+    autoFill,
+    setInputMode,
+    setValidationMode,
   }
 }

@@ -1,8 +1,11 @@
 // Nonogram Type Definitions
 // Phase 1: Foundation types for grid, cells, and puzzle data
 // Phase 2: Game logic, validation, and progress tracking
+// Phase 3: Input mode system with flip animation
 
-export type CellState = 'empty' | 'filled' | 'crossed'
+export type CellState = 'empty' | 'filled' | 'marked' | 'error'
+
+export type InputMode = 'fill' | 'mark'
 
 export type GridSize = 10 | 15 | 20
 
