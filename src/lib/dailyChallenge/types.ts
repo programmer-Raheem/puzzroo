@@ -26,7 +26,7 @@ export interface DailyChallenge {
   difficulty: DailyChallengeDifficulty
   shape: DailyChallengeShape
   status: DailyChallengeStatus
-  gameId: 'sudoku' | 'cross-math'
+  gameId: 'sudoku' | 'cross-math' | 'nonogram'
   puzzleData: any // Actual puzzle configuration
 }
 

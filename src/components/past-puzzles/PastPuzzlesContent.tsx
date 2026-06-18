@@ -30,10 +30,10 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   const router = useRouter()
 
   // Format game title
-  const gameTitle = gameId === 'cross-math' ? 'CrossMath' : gameId === 'sudoku' ? 'Sudoku' : gameId
+  const gameTitle = gameId === 'cross-math' ? 'CrossMath' : gameId === 'sudoku' ? 'Sudoku' : gameId === 'nonogram' ? 'Nonogram' : gameId
 
   // Get game icon
-  const gameIcon = gameId === 'cross-math' ? images.gameCards.crossWord : images.gameCards.sudoku
+  const gameIcon = gameId === 'cross-math' ? images.gameCards.crossWord : gameId === 'sudoku' ? images.gameCards.sudoku : gameId === 'nonogram' ? images.gameCards.nonogram : images.gameCards.sudoku
 
   // Lock body scroll when loading
   useEffect(() => {
@@ -52,7 +52,7 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
 
   useEffect(() => {
     // Generate 8 past puzzles
-    const generated = generatePastPuzzles(8, gameId as 'sudoku' | 'cross-math')
+    const generated = generatePastPuzzles(8, gameId as 'sudoku' | 'cross-math' | 'nonogram')
     
     // Update status from localStorage and apply lock
     const withStatus = generated.map((puzzle, index) => {
@@ -339,7 +339,7 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
     // Show loading for 2-3 seconds
     await new Promise(resolve => setTimeout(resolve, 2500))
     // Route directly to game page (not game lobby)
-    const gameUrl = puzzle.gameId === 'sudoku' ? '/sudoku' : puzzle.gameId === 'cross-math' ? '/cross-math' : '/sudoku'
+    const gameUrl = puzzle.gameId === 'sudoku' ? '/sudoku' : puzzle.gameId === 'cross-math' ? '/cross-math' : puzzle.gameId === 'nonogram' ? '/nonogram' : '/sudoku'
     router.push(gameUrl)
   }
 

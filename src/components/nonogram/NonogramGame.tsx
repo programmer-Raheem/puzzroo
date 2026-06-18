@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lightbulb, Flag } from 'lucide-react'
+import { Lightbulb, Flag, ArrowLeft } from 'lucide-react'
 import { useNonogram } from '@/hooks/useNonogram'
 import { NonogramModal } from './NonogramModal'
 import { InputModeToolbar } from '@/components/games/nonogram/InputModeToolbar'
 import { formatTime } from '@/lib/nonogram/helpers'
 import type { CellPosition } from '@/lib/nonogram/types'
 
-export function NonogramGame() {
+export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: string; onBackToSelection?: () => void }) {
   const router = useRouter()
   const {
     grid,
@@ -35,7 +35,7 @@ export function NonogramGame() {
     useHint,
     autoFill,
     setInputMode,
-  } = useNonogram()
+  } = useNonogram(puzzleId)
 
   const [windowWidth, setWindowWidth] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(1) // 1 = 100%, 0.6 = 60%, 1.5 = 150%
@@ -166,7 +166,7 @@ export function NonogramGame() {
     router.push('/#free-games')
   }
 
-  if (!isInitialized || !currentPuzzle) {
+  if (!isInitialized || !currentPuzzle || rowValidation.length === 0 || columnValidation.length === 0) {
     return (
       <section className="w-full bg-white dark:bg-[#181A20] min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -196,6 +196,36 @@ export function NonogramGame() {
             
             {/* Timer and Progress Bar */}
             <div className="w-full flex flex-col gap-3">
+              {/* Puzzle Metadata */}
+              <div className="text-center space-y-1">
+                {/* Back Button (if callback provided) */}
+                {onBackToSelection && (
+                  <button
+                    onClick={onBackToSelection}
+                    className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#F5F6FA] dark:bg-[#35383F] hover:bg-[#E8DFFF] dark:hover:bg-[#424242] text-[#6949FF] dark:text-[#8B6EFF] font-urbanist text-[14px] font-semibold transition-all duration-200"
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back to Puzzles</span>
+                  </button>
+                )}
+                
+                <h2 className="font-urbanist text-[24px] md:text-[28px] font-bold text-[#2B2F3A] dark:text-white">
+                  {currentPuzzle.title}
+                </h2>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] font-urbanist text-[12px] font-semibold text-[#6949FF] dark:text-[#A592FF]">
+                    <span className="capitalize">{currentPuzzle.category}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F5F6FA] dark:bg-[#35383F] font-urbanist text-[12px] font-semibold text-[#616161] dark:text-[#A0A4B8]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>~{Math.floor(currentPuzzle.estimatedTime / 60)} min</span>
+                  </span>
+                </div>
+              </div>
+              
               {/* Timer */}
               <div className="flex justify-center">
                 <div className="bg-[#F5F6FA] dark:bg-[#35383F] rounded-full px-6 py-2">
@@ -429,7 +459,7 @@ export function NonogramGame() {
                         } else if (isSelected) {
                           bgClass = 'bg-[#E8DFFF] dark:bg-[#3D2F7A]'
                         } else {
-                          bgClass = 'bg-white dark:bg-[#181A20] hover:bg-[#F5F6FA] dark:hover:bg-[#35383F]'
+                          bgClass = 'bg-[#F5F6FA] dark:bg-[#2A2D35] hover:bg-[#E8DFFF] dark:hover:bg-[#35383F]'
                         }
 
                         return (
@@ -528,7 +558,7 @@ export function NonogramGame() {
               
               {/* New Puzzle Button */}
               <button
-                onClick={newPuzzle}
+                onClick={() => newPuzzle()}
                 className="flex-1 h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[15px] transition-all duration-200 active:scale-95"
               >
                 New Puzzle
@@ -554,7 +584,7 @@ export function NonogramGame() {
         completionPercentage={progress.percentComplete}
         hintsUsed={hintsUsed}
         onPlayAgain={resetPuzzle}
-        onNewPuzzle={newPuzzle}
+        onNewPuzzle={() => newPuzzle()}
         onBackToGames={handleBackToGames}
       />
     </>

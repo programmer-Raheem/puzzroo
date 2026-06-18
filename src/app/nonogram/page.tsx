@@ -6,10 +6,13 @@ import Navbar from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/Footer'
 import { NonogramHero } from '@/components/nonogram/NonogramHero'
 import { NonogramGame } from '@/components/nonogram/NonogramGame'
+import { PuzzleSelection } from '@/components/nonogram/PuzzleSelection'
 import { markGameAsPlayed } from '@/components/sections/FreeGames'
 
 function NonogramContent() {
   const [mounted, setMounted] = useState(false)
+  const [showGame, setShowGame] = useState(false)
+  const [selectedPuzzleId, setSelectedPuzzleId] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -19,14 +22,26 @@ function NonogramContent() {
     // Mark Nonogram as played
     markGameAsPlayed('nonogram')
     
-    // Get difficulty from URL or use default
-    const difficulty = searchParams.get('difficulty') || 'easy'
-    
-    // Validate difficulty
-    if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-      router.replace('/nonogram?difficulty=easy')
+    // Check if puzzleId is in URL (coming from puzzle selection)
+    const puzzleId = searchParams.get('puzzleId')
+    if (puzzleId) {
+      setSelectedPuzzleId(puzzleId)
+      setShowGame(true)
     }
-  }, [searchParams, router])
+  }, [searchParams])
+
+  const handleSelectPuzzle = (puzzleId: string) => {
+    setSelectedPuzzleId(puzzleId)
+    setShowGame(true)
+    // Update URL with puzzle ID
+    router.push(`/nonogram?puzzleId=${puzzleId}`)
+  }
+
+  const handleBackToSelection = () => {
+    setShowGame(false)
+    setSelectedPuzzleId(null)
+    router.push('/nonogram')
+  }
 
   if (!mounted) {
     return null
@@ -35,7 +50,14 @@ function NonogramContent() {
   return (
     <>
       <NonogramHero />
-      <NonogramGame />
+      {showGame ? (
+        <NonogramGame 
+          puzzleId={selectedPuzzleId || undefined} 
+          onBackToSelection={handleBackToSelection}
+        />
+      ) : (
+        <PuzzleSelection onSelectPuzzle={handleSelectPuzzle} />
+      )}
     </>
   )
 }

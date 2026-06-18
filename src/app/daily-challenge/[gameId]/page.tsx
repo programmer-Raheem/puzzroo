@@ -10,6 +10,8 @@ import { SudokuGame } from '@/components/sudoku/SudokuGame'
 import { SudokuHero } from '@/components/sudoku/SudokuHero'
 import { CrossMathGame } from '@/components/crossmath/CrossMathGame'
 import { CrossMathHero } from '@/components/crossmath/CrossMathHero'
+import { NonogramGame } from '@/components/nonogram/NonogramGame'
+import { NonogramHero } from '@/components/nonogram/NonogramHero'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
@@ -60,6 +62,11 @@ function DailyChallengeContent() {
             <>
               <CrossMathHero backTo="/#free-games" />
               <CrossMathGame />
+            </>
+          ) : gameId === 'nonogram' ? (
+            <>
+              <NonogramHero backTo="/#free-games" />
+              <NonogramGame />
             </>
           ) : (
             <div className="flex items-center justify-center min-h-[400px]">

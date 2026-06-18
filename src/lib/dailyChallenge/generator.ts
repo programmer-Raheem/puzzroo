@@ -46,7 +46,7 @@ function getDayName(date: Date): string {
  */
 export function generateDailyChallenge(
   date: Date,
-  gameId: 'sudoku' | 'cross-math'
+  gameId: 'sudoku' | 'cross-math' | 'nonogram'
 ): DailyChallenge {
   const seed = dateToSeed(date)
   
@@ -80,7 +80,7 @@ export function generateDailyChallenge(
  */
 export function generatePastPuzzles(
   days: number,
-  gameId: 'sudoku' | 'cross-math'
+  gameId: 'sudoku' | 'cross-math' | 'nonogram'
 ): DailyChallenge[] {
   const puzzles: DailyChallenge[] = []
   const today = new Date()
@@ -99,6 +99,6 @@ export function generatePastPuzzles(
 /**
  * Get today's daily challenge
  */
-export function getTodayChallenge(gameId: 'sudoku' | 'cross-math'): DailyChallenge {
+export function getTodayChallenge(gameId: 'sudoku' | 'cross-math' | 'nonogram'): DailyChallenge {
   return generateDailyChallenge(new Date(), gameId)
 }

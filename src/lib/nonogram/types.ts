@@ -23,8 +23,11 @@ export interface Clue {
 
 export interface PuzzleData {
   id: string
+  title: string
   difficulty: Difficulty
   size: GridSize
+  category: string
+  estimatedTime: number // seconds
   solution: number[][] // Binary matrix: 1 = filled, 0 = empty
   rowClues: Clue[]
   columnClues: Clue[]

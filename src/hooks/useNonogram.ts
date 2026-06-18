@@ -29,8 +29,9 @@ import {
   calculateProgress,
   isCellMistake,
   findHintPosition,
+  validatePuzzleData,
 } from '@/lib/nonogram/helpers'
-import { getRandomPuzzle } from '@/data/nonogram'
+import { getRandomPuzzle, getPuzzleById } from '@/data/nonogram'
 import { 
   saveGameState, 
   loadGameState, 
@@ -38,8 +39,9 @@ import {
   updateStatsOnCompletion,
   getHintLimits,
 } from '@/lib/nonogram/storage'
+import { markPuzzleCompleted } from '@/lib/nonogram/completion'
 
-export function useNonogram() {
+export function useNonogram(initialPuzzleId?: string) {
   const searchParams = useSearchParams()
   const urlDifficulty = (searchParams.get('difficulty') || 'easy') as Difficulty
 
@@ -81,13 +83,26 @@ export function useNonogram() {
   /**
    * Initialize a new puzzle
    */
-  const initializePuzzle = useCallback((diff: Difficulty, loadSaved = true) => {
+  const initializePuzzle = useCallback((diff: Difficulty, loadSaved = true, puzzleId?: string) => {
     // Try to load saved game first
     if (loadSaved && typeof window !== 'undefined') {
       const saved = loadGameState()
       if (saved && saved.difficulty === diff) {
-        const puzzle = getRandomPuzzle(diff)
-        // Find the exact puzzle by ID
+        // If puzzleId is provided, find that specific puzzle, otherwise use random
+        let puzzle: PuzzleData
+        
+        if (puzzleId) {
+          const foundPuzzle = getPuzzleById(puzzleId)
+          if (foundPuzzle) {
+            puzzle = foundPuzzle
+          } else {
+            console.warn(`Puzzle ${puzzleId} not found, using random puzzle`)
+            puzzle = getRandomPuzzle(diff)
+          }
+        } else {
+          puzzle = getRandomPuzzle(diff)
+        }
+        
         setCurrentPuzzle(puzzle)
         setGrid(saved.grid)
         setElapsedSeconds(saved.elapsedSeconds)
@@ -98,8 +113,29 @@ export function useNonogram() {
       }
     }
 
-    // Load new puzzle
-    const puzzle = getRandomPuzzle(diff)
+    // Load new puzzle - specific or random
+    let puzzle: PuzzleData
+    
+    if (puzzleId) {
+      const foundPuzzle = getPuzzleById(puzzleId)
+      if (foundPuzzle) {
+        puzzle = foundPuzzle
+      } else {
+        console.warn(`Puzzle ${puzzleId} not found, using random puzzle`)
+        puzzle = getRandomPuzzle(diff)
+      }
+    } else {
+      puzzle = getRandomPuzzle(diff)
+    }
+    
+    // Validate puzzle data integrity
+    const isValid = validatePuzzleData(puzzle.solution, puzzle.rowClues, puzzle.columnClues)
+    if (!isValid) {
+      console.error(`Puzzle ${puzzle.id} failed validation. Using fallback puzzle.`)
+      // Fallback to first easy puzzle or generate safe empty puzzle
+      puzzle = getRandomPuzzle('easy')
+    }
+    
     const emptyGrid = createEmptyGrid(puzzle.size)
     
     setCurrentPuzzle(puzzle)
@@ -129,10 +165,11 @@ export function useNonogram() {
       const currentDiff = valid.includes(urlDifficulty) ? urlDifficulty : 'easy'
       
       setDifficulty(currentDiff)
-      initializePuzzle(currentDiff)
+      // Use provided puzzleId or let initializePuzzle use random
+      initializePuzzle(currentDiff, true, initialPuzzleId)
       setIsInitialized(true)
     }
-  }, [urlDifficulty, isInitialized, initializePuzzle])
+  }, [urlDifficulty, isInitialized, initialPuzzleId, initializePuzzle])
 
   /**
    * Timer management
@@ -202,6 +239,10 @@ export function useNonogram() {
     if (isComplete) {
       setGameStatus('won')
       updateStatsOnCompletion(elapsedSeconds)
+      
+      // Mark puzzle as completed in the tracking system
+      markPuzzleCompleted(currentPuzzle.id, elapsedSeconds, hintsUsed)
+      
       clearGameState()
     }
   }, [grid, currentPuzzle, gameStatus, elapsedSeconds])
@@ -448,16 +489,16 @@ export function useNonogram() {
   /**
    * Start a new puzzle
    */
-  const newPuzzle = useCallback(() => {
-    initializePuzzle(difficulty, false)
+  const newPuzzle = useCallback((puzzleId?: string) => {
+    initializePuzzle(difficulty, false, puzzleId)
   }, [difficulty, initializePuzzle])
 
   /**
    * Change difficulty
    */
-  const changeDifficulty = useCallback((newDifficulty: Difficulty) => {
+  const changeDifficulty = useCallback((newDifficulty: Difficulty, puzzleId?: string) => {
     setDifficulty(newDifficulty)
-    initializePuzzle(newDifficulty, false)
+    initializePuzzle(newDifficulty, false, puzzleId)
   }, [initializePuzzle])
 
   /**
