@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { formatTime } from '@/lib/nonogram/helpers'
 import type { Difficulty } from '@/lib/nonogram/types'
-import { Trophy, Clock, Target, Lightbulb } from 'lucide-react'
+import { Trophy, Clock, Target, Lightbulb, Frown, X } from 'lucide-react'
 
 interface NonogramModalProps {
   isOpen: boolean
@@ -11,6 +11,9 @@ interface NonogramModalProps {
   time: number
   completionPercentage: number
   hintsUsed: number
+  mistakes: number
+  maxMistakes: number
+  isWin: boolean
   onPlayAgain: () => void
   onNewPuzzle: () => void
   onBackToGames?: () => void
@@ -22,6 +25,9 @@ export function NonogramModal({
   time,
   completionPercentage,
   hintsUsed,
+  mistakes,
+  maxMistakes,
+  isWin,
   onPlayAgain,
   onNewPuzzle,
   onBackToGames,
@@ -30,13 +36,17 @@ export function NonogramModal({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onNewPuzzle()
+        if (isWin) {
+          onNewPuzzle()
+        } else {
+          onPlayAgain()
+        }
       }
     }
 
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
-  }, [isOpen, onNewPuzzle])
+  }, [isOpen, isWin, onNewPuzzle, onPlayAgain])
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -61,7 +71,7 @@ export function NonogramModal({
         className={`fixed inset-0 bg-black/50 dark:bg-black/70 z-50 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={onNewPuzzle}
+        onClick={isWin ? onNewPuzzle : onPlayAgain}
       />
 
       {/* Modal */}
@@ -76,25 +86,38 @@ export function NonogramModal({
           aria-modal="true"
           aria-labelledby="modal-title"
         >
-          {/* Header with Gradient */}
+          {/* Header with Purple Gradient (matching original design) */}
           <div className="bg-gradient-to-br from-[#6949FF] to-[#8B6EFF] px-4 py-4 text-center relative overflow-hidden">
             {/* Decorative circles */}
             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
             <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full -ml-8 -mb-8" />
             
+            {/* Close button */}
+            <button
+              onClick={isWin ? onNewPuzzle : onPlayAgain}
+              className="absolute top-2 right-2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+              aria-label="Close modal"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+            
             {/* Content */}
             <div className="relative z-10">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-2">
-                <Trophy className="w-5 h-5 text-white" />
+                {isWin ? (
+                  <Trophy className="w-5 h-5 text-white" />
+                ) : (
+                  <Frown className="w-5 h-5 text-white" />
+                )}
               </div>
               <h2
                 id="modal-title"
                 className="font-urbanist text-xl font-extrabold text-white mb-0.5"
               >
-                Puzzle Complete!
+                {isWin ? 'Puzzle Complete!' : 'Keep Going!'}
               </h2>
               <p className="font-urbanist text-white/90 text-xs">
-                Amazing work on the puzzle!
+                {isWin ? 'Amazing work on the puzzle!' : 'You reached the maximum mistakes limit.'}
               </p>
             </div>
           </div>
@@ -150,22 +173,51 @@ export function NonogramModal({
                   {hintsUsed}
                 </div>
               </div>
+
+              {/* Mistakes */}
+              <div className="bg-[#FFF0F0] dark:bg-[#3A1A1A] border border-[#FFCDD2] dark:border-[#7A2A2A] rounded-lg p-2.5 text-center col-span-2">
+                <div className="font-urbanist text-[9px] text-[#EF4444] dark:text-[#E57373] uppercase tracking-wide mb-0.5 font-bold">
+                  Mistakes Made
+                </div>
+                <div className="font-urbanist text-base font-bold text-[#EF4444] dark:text-[#FF6B6B]">
+                  {Math.min(mistakes, maxMistakes)} / {maxMistakes}
+                </div>
+              </div>
             </div>
 
             {/* Buttons */}
             <div className="flex flex-col gap-2">
-              <button
-                onClick={onNewPuzzle}
-                className="w-full h-[40px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
-              >
-                New Puzzle
-              </button>
-              <button
-                onClick={onPlayAgain}
-                className="w-full h-[40px] rounded-full bg-white dark:bg-[#35383F] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] dark:text-white hover:text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none border border-[#E0E0E0] dark:border-[#424242] hover:border-[#6949FF]"
-              >
-                Play Again
-              </button>
+              {isWin ? (
+                <>
+                  <button
+                    onClick={onNewPuzzle}
+                    className="w-full h-[40px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
+                  >
+                    New Puzzle
+                  </button>
+                  <button
+                    onClick={onPlayAgain}
+                    className="w-full h-[40px] rounded-full bg-white dark:bg-[#35383F] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] dark:text-white hover:text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none border border-[#E0E0E0] dark:border-[#424242] hover:border-[#6949FF]"
+                  >
+                    Play Again
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={onPlayAgain}
+                    className="w-full h-[40px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={onNewPuzzle}
+                    className="w-full h-[40px] rounded-full bg-white dark:bg-[#35383F] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] dark:text-white hover:text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none border border-[#E0E0E0] dark:border-[#424242] hover:border-[#6949FF]"
+                  >
+                    New Puzzle
+                  </button>
+                </>
+              )}
               {onBackToGames && (
                 <button
                   onClick={onBackToGames}

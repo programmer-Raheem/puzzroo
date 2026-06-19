@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lightbulb, Flag, ArrowLeft } from 'lucide-react'
+import { Lightbulb, Flag, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useNonogram } from '@/hooks/useNonogram'
 import { NonogramModal } from './NonogramModal'
 import { InputModeToolbar } from '@/components/games/nonogram/InputModeToolbar'
@@ -24,6 +24,8 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
     hintsUsed,
     maxHints,
     errorCell,
+    mistakeCount,
+    maxMistakes,
     isDragging,
     dragPreviewCells,
     inputMode,
@@ -42,6 +44,33 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
   const [isPinching, setIsPinching] = useState(false)
   const initialPinchDistance = useRef<number>(0)
   const initialZoomLevel = useRef<number>(1)
+
+  const boardContainerRef = useRef<HTMLDivElement>(null)
+  const scrollbarContainerRef = useRef<HTMLDivElement>(null)
+  const isSyncingScroll = useRef(false)
+
+  const handleBoardScroll = () => {
+    if (isSyncingScroll.current) return
+    isSyncingScroll.current = true
+    if (scrollbarContainerRef.current && boardContainerRef.current) {
+      scrollbarContainerRef.current.scrollLeft = boardContainerRef.current.scrollLeft
+    }
+    window.requestAnimationFrame(() => {
+      isSyncingScroll.current = false
+    })
+  }
+
+  const handleScrollbarScroll = () => {
+    if (isSyncingScroll.current) return
+    isSyncingScroll.current = true
+    if (boardContainerRef.current && scrollbarContainerRef.current) {
+      boardContainerRef.current.scrollLeft = scrollbarContainerRef.current.scrollLeft
+    }
+    window.requestAnimationFrame(() => {
+      isSyncingScroll.current = false
+    })
+  }
+
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth)
@@ -166,6 +195,22 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
     router.push('/#free-games')
   }
 
+  // These must be computed before any early return to satisfy Rules of Hooks
+  const maxRowClueCount = currentPuzzle ? Math.max(...currentPuzzle.rowClues.map(c => c.values.length), 1) : 1
+  const maxColClueCount = currentPuzzle ? Math.max(...currentPuzzle.columnClues.map(c => c.values.length), 1) : 1
+
+  // Clue size should also scale with zoom
+  const clueSize = cellSize
+  const cornerWidth = maxRowClueCount * clueSize
+  const cornerHeight = maxColClueCount * clueSize
+
+  const isOverflowing = useMemo(() => {
+    if (!currentPuzzle || windowWidth === 0) return false
+    const boardWidth = cornerWidth + currentPuzzle.size * cellSize
+    const containerWidth = Math.min(windowWidth - 40, 717.5)
+    return boardWidth > containerWidth
+  }, [currentPuzzle, windowWidth, cornerWidth, cellSize])
+
   if (!isInitialized || !currentPuzzle || rowValidation.length === 0 || columnValidation.length === 0) {
     return (
       <section className="w-full bg-white dark:bg-[#181A20] min-h-screen flex items-center justify-center">
@@ -178,21 +223,14 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
     )
   }
 
-  const maxRowClueCount = Math.max(...currentPuzzle.rowClues.map(c => c.values.length), 1)
-  const maxColClueCount = Math.max(...currentPuzzle.columnClues.map(c => c.values.length), 1)
-  
-  // Clue size should also scale with zoom
-  const clueSize = cellSize
-  const cornerWidth = maxRowClueCount * clueSize
-  const cornerHeight = maxColClueCount * clueSize
 
   const canUseHint = hintsUsed < maxHints && gameStatus === 'playing'
 
   return (
     <>
-      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300 overflow-x-hidden">
-        <div className="w-full px-[20px] py-[40px] flex justify-center overflow-x-hidden">
-          <div className="w-full max-w-[717.5px] flex flex-col items-center gap-[20px] overflow-x-hidden">
+      <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300">
+        <div className="w-full px-[20px] py-[40px] flex justify-center">
+          <div className="w-full max-w-[717.5px] flex flex-col items-center gap-[20px]">
             
             {/* Timer and Progress Bar */}
             <div className="w-full flex flex-col gap-3">
@@ -260,7 +298,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
             </div>
 
             {/* Zoom Controls */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               <button
                 onClick={() => setZoomLevel(Math.max(0.6, zoomLevel - 0.1))}
                 className="w-8 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] hover:bg-[#D4C5F9] dark:hover:bg-[#4A3A8C] text-[#6949FF] dark:text-[#A592FF] flex items-center justify-center transition-all duration-200 active:scale-95"
@@ -296,6 +334,9 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
               >
                 Reset
               </button>
+              <span className="font-urbanist font-bold text-[14px] text-[var(--color-primary)] ml-3" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                Mistakes: {mistakeCount}/{maxMistakes}
+              </span>
             </div>
 
             {/* Input Mode Toolbar */}
@@ -306,9 +347,14 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
               maxWidth={cornerWidth + (currentPuzzle.size * cellSize)}
             />
 
-            {/* Game Board */}
-            <div className="w-full flex justify-center overflow-x-auto">
-              <div className="inline-flex flex-col border-2 border-[#D0D3DC] dark:border-[#616161]" style={{ maxWidth: '100%' }}>
+            {/* Game Board — scrollable container with stable outer width and custom scrollbar hidden */}
+            <div
+              ref={boardContainerRef}
+              onScroll={handleBoardScroll}
+              className="w-full overflow-x-auto pb-2 hide-scrollbar flex justify-center"
+              style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+            >
+              <div className="inline-flex flex-col border-2 border-[#D0D3DC] dark:border-[#616161] mx-auto">
                 
                 {/* Top: Corner + Column Clues */}
                 <div className="flex">
@@ -318,46 +364,55 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                   />
                   
                   <div className="flex">
-                    {currentPuzzle.columnClues.map((clue, colIdx) => {
+                  {currentPuzzle.columnClues.map((clue, colIdx) => {
                       const isCompleted = columnValidation[colIdx] === 'completed'
+                      // A column with no clue values is an all-zero column (no fills needed)
+                      const isEmptyCol = clue.values.length === 0
                       return (
                         <div
                           key={`col-clue-${colIdx}`}
                           className="flex flex-col items-center justify-end"
                           style={{ width: `${cellSize}px`, minHeight: `${cornerHeight}px` }}
                         >
-                          {clue.values.map((value, vIdx) => {
-                            const displayValue = value === 6 ? 0 : value
-                            const bgColor = displayValue === 0 
-                              ? 'bg-[#6949FF]' 
-                              : isCompleted 
-                                ? 'bg-[#2F6FED] dark:bg-[#2F6FED]'
+                          {isEmptyCol ? (
+                            // Show 0 for empty columns and make its background purple
+                            <div
+                              className="flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white"
+                              style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
+                            >
+                              <span className="font-urbanist font-bold text-white" style={{ fontSize: '11px' }}>0</span>
+                            </div>
+                          ) : (
+                            clue.values.map((value, vIdx) => {
+                              // value is used directly — no sentinel mapping needed
+                              const bgColor = isCompleted
+                                ? 'bg-[#6949FF] dark:bg-[#6949FF]'
                                 : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
-                            const textColor = displayValue === 0 || isCompleted
-                              ? 'text-white'
-                              : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
-                            
-                            // Responsive font size based on digit count and cell size
-                            const digitCount = displayValue.toString().length
-                            const fontSize = digitCount >= 2 
-                              ? Math.max(9, Math.min(12, cellSize * 0.45))
-                              : Math.max(11, Math.min(14, cellSize * 0.55))
-                            
-                            return (
-                              <div
-                                key={vIdx}
-                                className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
-                                style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
-                              >
-                                <span 
-                                  className={`font-urbanist font-bold ${textColor}`}
-                                  style={{ fontSize: `${fontSize}px` }}
+                              const textColor = isCompleted
+                                ? 'text-white'
+                                : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
+
+                              const digitCount = value.toString().length
+                              const fontSize = digitCount >= 2
+                                ? Math.max(9, Math.min(12, cellSize * 0.45))
+                                : Math.max(11, Math.min(14, cellSize * 0.55))
+
+                              return (
+                                <div
+                                  key={vIdx}
+                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
+                                  style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                                 >
-                                  {displayValue}
-                                </span>
-                              </div>
-                            )
-                          })}
+                                  <span
+                                    className={`font-urbanist font-bold ${textColor}`}
+                                    style={{ fontSize: `${fontSize}px` }}
+                                  >
+                                    {value}
+                                  </span>
+                                </div>
+                              )
+                            })
+                          )}
                         </div>
                       )
                     })}
@@ -369,44 +424,53 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                   <div className="flex flex-col flex-shrink-0">
                     {currentPuzzle.rowClues.map((clue, rowIdx) => {
                       const isCompleted = rowValidation[rowIdx] === 'completed'
+                      // A row with no clue values is an all-zero row (no fills needed)
+                      const isEmptyRow = clue.values.length === 0
                       return (
                         <div
                           key={`row-clue-${rowIdx}`}
                           className="flex items-center justify-end"
                           style={{ minWidth: `${cornerWidth}px`, height: `${cellSize}px` }}
                         >
-                          {clue.values.map((value, vIdx) => {
-                            const displayValue = value === 6 ? 0 : value
-                            const bgColor = displayValue === 0 
-                              ? 'bg-[#6949FF]' 
-                              : isCompleted 
-                                ? 'bg-[#2F6FED] dark:bg-[#2F6FED]'
+                          {isEmptyRow ? (
+                            // Show 0 for empty rows and make its background purple
+                            <div
+                              className="flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white"
+                              style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
+                            >
+                              <span className="font-urbanist font-bold text-white" style={{ fontSize: '11px' }}>0</span>
+                            </div>
+                          ) : (
+                            clue.values.map((value, vIdx) => {
+                              // value is used directly — no sentinel mapping needed
+                              const bgColor = isCompleted
+                                ? 'bg-[#6949FF] dark:bg-[#6949FF]'
                                 : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
-                            const textColor = displayValue === 0 || isCompleted
-                              ? 'text-white'
-                              : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
-                            
-                            // Responsive font size based on digit count and cell size
-                            const digitCount = displayValue.toString().length
-                            const fontSize = digitCount >= 2 
-                              ? Math.max(9, Math.min(12, cellSize * 0.45))
-                              : Math.max(11, Math.min(14, cellSize * 0.55))
-                            
-                            return (
-                              <div
-                                key={vIdx}
-                                className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
-                                style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
-                              >
-                                <span 
-                                  className={`font-urbanist font-bold ${textColor}`}
-                                  style={{ fontSize: `${fontSize}px` }}
+                              const textColor = isCompleted
+                                ? 'text-white'
+                                : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
+
+                              const digitCount = value.toString().length
+                              const fontSize = digitCount >= 2
+                                ? Math.max(9, Math.min(12, cellSize * 0.45))
+                                : Math.max(11, Math.min(14, cellSize * 0.55))
+
+                              return (
+                                <div
+                                  key={vIdx}
+                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
+                                  style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                                 >
-                                  {displayValue}
-                                </span>
-                              </div>
-                            )
-                          })}
+                                  <span
+                                    className={`font-urbanist font-bold ${textColor}`}
+                                    style={{ fontSize: `${fontSize}px` }}
+                                  >
+                                    {value}
+                                  </span>
+                                </div>
+                              )
+                            })
+                          )}
                         </div>
                       )
                     })}
@@ -430,12 +494,11 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                         const isError = errorCell?.row === rowIdx && errorCell?.col === colIdx
                         const cellKey = `${rowIdx}-${colIdx}`
                         const isInDragPreview = dragPreviewCells.has(cellKey) && cellState === 'empty'
-                        
-                        // Check if this row and column are both completed
+
+                        // Dynamic grey-out of completed rows/columns
                         const isRowCompleted = rowValidation[rowIdx] === 'completed'
                         const isColCompleted = columnValidation[colIdx] === 'completed'
-                        const shouldBeEmpty = currentPuzzle.solution[rowIdx][colIdx] === 0
-                        const showCompletedEmpty = (isRowCompleted || isColCompleted) && shouldBeEmpty && cellState === 'empty'
+                        const shouldBeGreyed = (isRowCompleted || isColCompleted) && cellState !== 'filled'
                         
                         const hasThickRight = (colIdx + 1) % 5 === 0 && colIdx !== currentPuzzle.size - 1
                         const hasThickBottom = (rowIdx + 1) % 5 === 0 && rowIdx !== currentPuzzle.size - 1
@@ -443,7 +506,11 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                         let bgClass = ''
                         let borderClass = ''
                         
-                        if (isInDragPreview) {
+                        if (shouldBeGreyed) {
+                          // Visually grey out cells when row/column is complete
+                          bgClass = 'bg-[#E8E8E8] dark:bg-[#252830]'
+                          borderClass = 'opacity-40'
+                        } else if (isInDragPreview) {
                           // Light purple preview during drag
                           bgClass = 'bg-[#A592FF] dark:bg-[#7C6BAE]'
                         } else if (isError || cellState === 'error') {
@@ -453,13 +520,10 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                           bgClass = 'bg-[#000000] dark:bg-[#0A0A0A]'
                         } else if (cellState === 'marked') {
                           bgClass = 'bg-white dark:bg-[#181A20]'
-                        } else if (showCompletedEmpty) {
-                          // Light gray for empty cells in completed rows/columns
-                          bgClass = 'bg-[#E8E8E8] dark:bg-[#2A2D35]'
                         } else if (isSelected) {
                           bgClass = 'bg-[#E8DFFF] dark:bg-[#3D2F7A]'
                         } else {
-                          bgClass = 'bg-[#F5F6FA] dark:bg-[#2A2D35] hover:bg-[#E8DFFF] dark:hover:bg-[#35383F]'
+                          bgClass = 'bg-white dark:bg-[#2A2D35] hover:bg-[#E8DFFF] dark:hover:bg-[#35383F]'
                         }
 
                         return (
@@ -514,6 +578,55 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                 </div>
               </div>
             </div>
+
+            {/* Custom horizontal scrollbar synced with board scroll (rendered on both mobile and desktop when overflowing) */}
+            {isOverflowing && (
+              <div className="w-full mt-3 px-[10px]">
+                <div className="flex items-center gap-2 max-w-full justify-center">
+                  <button
+                    onClick={() => {
+                      if (boardContainerRef.current) {
+                        boardContainerRef.current.scrollLeft -= 50
+                      }
+                    }}
+                    className="lg:hidden w-8 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] text-[#6949FF] dark:text-[#A592FF] flex items-center justify-center active:scale-95 transition-all duration-200"
+                    title="Scroll left"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <div
+                    ref={scrollbarContainerRef}
+                    onScroll={handleScrollbarScroll}
+                    className="flex-grow overflow-x-auto board-scroll-container"
+                    style={{ 
+                      height: '14px',
+                      maxWidth: `${cornerWidth + currentPuzzle.size * cellSize}px`
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${cornerWidth + currentPuzzle.size * cellSize}px`,
+                        height: '1px',
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (boardContainerRef.current) {
+                        boardContainerRef.current.scrollLeft += 50
+                      }
+                    }}
+                    className="lg:hidden w-8 h-8 rounded-full bg-[#E8DFFF] dark:bg-[#3D2F7A] text-[#6949FF] dark:text-[#A592FF] flex items-center justify-center active:scale-95 transition-all duration-200"
+                    title="Scroll right"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+                <p className="text-center font-urbanist text-[11px] text-[#BDBDBD] dark:text-[#616161] mt-1">
+                  ← Scroll to see full board →
+                </p>
+              </div>
+            )}
 
             {/* Controls */}
             <div 
@@ -576,13 +689,16 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
         </div>
       </section>
 
-      {/* Completion Modal */}
+      {/* Completion & Game Over Modal */}
       <NonogramModal
-        isOpen={gameStatus === 'won'}
+        isOpen={gameStatus === 'won' || gameStatus === 'lost'}
         difficulty={currentPuzzle.difficulty}
         time={elapsedSeconds}
         completionPercentage={progress.percentComplete}
         hintsUsed={hintsUsed}
+        mistakes={mistakeCount}
+        maxMistakes={maxMistakes}
+        isWin={gameStatus === 'won'}
         onPlayAgain={resetPuzzle}
         onNewPuzzle={() => newPuzzle()}
         onBackToGames={handleBackToGames}

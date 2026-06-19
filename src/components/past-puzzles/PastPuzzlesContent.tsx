@@ -12,6 +12,7 @@ import { AccessModal } from './AccessModal'
 import { FilterDropdown } from './FilterDropdown'
 import { CalendarModal } from './CalendarModal'
 import { images } from '@/lib/utils'
+import { useTheme } from '@/hooks/use-theme'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
@@ -28,12 +29,19 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   const [isLoading, setIsLoading] = useState(false)
   const accessibleCount = getAccessiblePastChallenges()
   const router = useRouter()
+  const { theme } = useTheme()
 
   // Format game title
   const gameTitle = gameId === 'cross-math' ? 'CrossMath' : gameId === 'sudoku' ? 'Sudoku' : gameId === 'nonogram' ? 'Nonogram' : gameId
 
-  // Get game icon
-  const gameIcon = gameId === 'cross-math' ? images.gameCards.crossWord : gameId === 'sudoku' ? images.gameCards.sudoku : gameId === 'nonogram' ? images.gameCards.nonogram : images.gameCards.sudoku
+  // Get game icon - theme aware for nonogram
+  const gameIcon = gameId === 'cross-math' 
+    ? images.gameCards.crossWord 
+    : gameId === 'sudoku' 
+      ? images.gameCards.sudoku 
+      : gameId === 'nonogram' 
+        ? (theme === 'light' ? images.gameCards.nonogramWhite : images.gameCards.nonogram)
+        : images.gameCards.sudoku
 
   // Lock body scroll when loading
   useEffect(() => {
@@ -339,7 +347,8 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
     // Show loading for 2-3 seconds
     await new Promise(resolve => setTimeout(resolve, 2500))
     // Route directly to game page (not game lobby)
-    const gameUrl = puzzle.gameId === 'sudoku' ? '/sudoku' : puzzle.gameId === 'cross-math' ? '/cross-math' : puzzle.gameId === 'nonogram' ? '/nonogram' : '/sudoku'
+    // Add skipSelection=true for nonogram to bypass puzzle selection
+    const gameUrl = puzzle.gameId === 'sudoku' ? '/sudoku' : puzzle.gameId === 'cross-math' ? '/cross-math' : puzzle.gameId === 'nonogram' ? '/nonogram?skipSelection=true' : '/sudoku'
     router.push(gameUrl)
   }
 

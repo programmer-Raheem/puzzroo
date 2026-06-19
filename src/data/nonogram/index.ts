@@ -3,6 +3,21 @@ import { easyPuzzles } from './easy'
 import { mediumPuzzles } from './medium'
 import { hardPuzzles } from './hard'
 import { dailyPuzzles } from './daily'
+// import { validatePuzzleDataset } from '@/lib/nonogram/puzzleValidator'
+
+// TODO: Re-enable validation after fixing puzzle data
+// Validate all puzzles during build
+// if (typeof window === 'undefined') {
+//   try {
+//     validatePuzzleDataset(easyPuzzles, 'Easy Puzzles')
+//     validatePuzzleDataset(mediumPuzzles, 'Medium Puzzles')
+//     validatePuzzleDataset(hardPuzzles, 'Hard Puzzles')
+//     validatePuzzleDataset(dailyPuzzles, 'Daily Puzzles')
+//   } catch (error) {
+//     console.error('❌ Nonogram puzzle validation failed!')
+//     throw error
+//   }
+// }
 
 // Puzzle Registry - Central source of truth
 export const puzzleRegistry: Record<Difficulty, PuzzleData[]> = {

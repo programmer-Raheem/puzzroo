@@ -24,7 +24,10 @@ function NonogramContent() {
     
     // Check if puzzleId is in URL (coming from puzzle selection)
     const puzzleId = searchParams.get('puzzleId')
-    if (puzzleId) {
+    // Check if skipSelection is in URL (coming from past puzzles/daily challenge)
+    const skipSelection = searchParams.get('skipSelection')
+    
+    if (puzzleId || skipSelection === 'true') {
       setSelectedPuzzleId(puzzleId)
       setShowGame(true)
     }

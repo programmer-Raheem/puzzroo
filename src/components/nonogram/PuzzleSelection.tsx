@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { Check, Clock } from 'lucide-react'
 import { Difficulty } from '@/lib/nonogram/types'
 import { getPuzzlesByDifficulty, puzzleCounts } from '@/data/nonogram'
 import { getCompletedPuzzleIds } from '@/lib/nonogram/completion'
+import { images } from '@/lib/utils'
+import { useTheme } from '@/hooks/use-theme'
 
 interface PuzzleSelectionProps {
   onSelectPuzzle: (puzzleId: string) => void
@@ -13,8 +16,27 @@ interface PuzzleSelectionProps {
 
 export function PuzzleSelection({ onSelectPuzzle }: PuzzleSelectionProps) {
   const router = useRouter()
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('easy')
+  const searchParams = useSearchParams()
+  const { theme } = useTheme()
+
+  // Sync difficulty tab with the ?difficulty= URL param set by the game lobby Play button
+  const urlDifficulty = searchParams.get('difficulty') as Difficulty | null
+  const validDifficulties: Difficulty[] = ['easy', 'medium', 'hard']
+  const initialDifficulty: Difficulty =
+    urlDifficulty && validDifficulties.includes(urlDifficulty) ? urlDifficulty : 'easy'
+
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(initialDifficulty)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
+
+  // Get theme-aware nonogram image
+  const nonogramImage = theme === 'light' ? images.gameCards.nonogramWhite : images.gameCards.nonogram
+
+  // When the URL difficulty param changes (e.g. browser back/forward), update the tab
+  useEffect(() => {
+    if (urlDifficulty && validDifficulties.includes(urlDifficulty)) {
+      setSelectedDifficulty(urlDifficulty)
+    }
+  }, [urlDifficulty])
 
   useEffect(() => {
     // Load completed puzzle IDs on mount (client-side only)
@@ -111,15 +133,13 @@ export function PuzzleSelection({ onSelectPuzzle }: PuzzleSelectionProps) {
                 {/* Puzzle Icon/Preview */}
                 <div className="flex justify-center">
                   <div className="w-20 h-20 bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl flex items-center justify-center group-hover:shadow-md group-hover:shadow-purple-500/20 transition-shadow duration-300">
-                    <div className="grid grid-cols-3 gap-1 p-3">
-                      {/* Mini grid preview */}
-                      {Array.from({ length: 9 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-2 h-2 bg-[#6949FF] dark:bg-[#8B6EFF] rounded-sm"
-                        />
-                      ))}
-                    </div>
+                    <Image
+                      src={nonogramImage}
+                      alt="Nonogram"
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
                   </div>
                 </div>
 

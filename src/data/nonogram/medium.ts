@@ -25,7 +25,7 @@ export const mediumPuzzles: PuzzleData[] = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
-    rowClues: [
+        rowClues: [
       { values: [2, 2] },
       { values: [2, 2] },
       { values: [9] },
@@ -39,26 +39,26 @@ export const mediumPuzzles: PuzzleData[] = [
       { values: [4, 4] },
       { values: [7] },
       { values: [5] },
-      { values: [0] },
-      { values: [0] },
+      { values: [] },
+      { values: [] },
     ],
-    columnClues: [
-      { values: [4] },
-      { values: [7] },
-      { values: [8, 1] },
-      { values: [6, 3] },
-      { values: [10] },
-      { values: [10] },
-      { values: [9] },
-      { values: [9] },
-      { values: [10] },
-      { values: [10] },
-      { values: [6, 3] },
-      { values: [8, 1] },
-      { values: [7] },
-      { values: [0] },
-      { values: [0] },
-    ],
+              columnClues: [
+        { values: [4] },
+        { values: [7] },
+        { values: [7, 3] },
+        { values: [3, 8] },
+        { values: [11] },
+        { values: [5, 5] },
+        { values: [5, 2, 2] },
+        { values: [5, 5] },
+        { values: [11] },
+        { values: [3, 8] },
+        { values: [7, 3] },
+        { values: [7] },
+        { values: [4] },
+        { values: [] },
+        { values: [] },
+      ]
   },
   {
     id: 'medium-fish',
@@ -84,28 +84,28 @@ export const mediumPuzzles: PuzzleData[] = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
-    rowClues: [
+        rowClues: [
       { values: [3] },
       { values: [5] },
       { values: [7] },
-      { values: [4, 7] },
+      { values: [11] },
       { values: [13] },
       { values: [14] },
       { values: [15] },
       { values: [14] },
       { values: [13] },
-      { values: [4, 7] },
+      { values: [11] },
       { values: [7] },
       { values: [5] },
       { values: [3] },
-      { values: [0] },
-      { values: [0] },
+      { values: [] },
+      { values: [] },
     ],
-    columnClues: [
-      { values: [4] },
-      { values: [6] },
-      { values: [6] },
-      { values: [6] },
+        columnClues: [
+      { values: [5] },
+      { values: [7] },
+      { values: [7] },
+      { values: [7] },
       { values: [9] },
       { values: [11] },
       { values: [13] },
@@ -113,9 +113,9 @@ export const mediumPuzzles: PuzzleData[] = [
       { values: [13] },
       { values: [11] },
       { values: [9] },
-      { values: [6] },
-      { values: [6] },
-      { values: [4] },
+      { values: [7] },
+      { values: [5] },
+      { values: [3] },
       { values: [1] },
     ],
   },
@@ -143,7 +143,7 @@ export const mediumPuzzles: PuzzleData[] = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
-    rowClues: [
+      rowClues: [
       { values: [3] },
       { values: [5] },
       { values: [7] },
@@ -157,25 +157,25 @@ export const mediumPuzzles: PuzzleData[] = [
       { values: [3] },
       { values: [3] },
       { values: [5] },
-      { values: [0] },
-      { values: [0] },
+      { values: [] },
+      { values: [] },
     ],
-    columnClues: [
-      { values: [0] },
-      { values: [0] },
-      { values: [2] },
-      { values: [2] },
-      { values: [3] },
-      { values: [8] },
-      { values: [10] },
-      { values: [11] },
-      { values: [11] },
-      { values: [10] },
-      { values: [8] },
-      { values: [3] },
-      { values: [2] },
-      { values: [0] },
-      { values: [0] },
+          columnClues: [
+      { values: [] },
+      { values: [] },
+      { values: [1, 1] },
+      { values: [2, 2] },
+      { values: [3, 3] },
+      { values: [9, 1] },
+      { values: [13] },
+      { values: [13] },
+      { values: [13] },
+      { values: [9, 1] },
+      { values: [3, 3] },
+      { values: [2, 2] },
+      { values: [1, 1] },
+      { values: [] },
+      { values: [] },
     ],
   },
   {
@@ -216,25 +216,25 @@ export const mediumPuzzles: PuzzleData[] = [
       { values: [11] },
       { values: [2, 2] },
       { values: [2, 2] },
-      { values: [0] },
-      { values: [0] },
+      { values: [] },
+      { values: [] },
     ],
-    columnClues: [
-      { values: [0] },
-      { values: [0] },
-      { values: [2] },
-      { values: [3] },
-      { values: [2, 1] },
-      { values: [8] },
-      { values: [10] },
-      { values: [11] },
-      { values: [11] },
-      { values: [10] },
-      { values: [8] },
-      { values: [2, 1] },
-      { values: [3] },
-      { values: [2] },
-      { values: [0] },
+        columnClues: [
+      { values: [] },        // col 1
+      { values: [] },        // col 2
+      { values: [1, 1] },    // col 3
+      { values: [4] },       // col 4
+      { values: [1, 4] },    // col 5
+      { values: [9] },       // col 6
+      { values: [10] },      // col 7
+      { values: [11] },      // col 8
+      { values: [10] },      // col 9
+      { values: [9] },       // col 10
+      { values: [1, 4] },    // col 11
+      { values: [4] },       // col 12
+      { values: [1, 1] },    // col 13
+      { values: [] },        // col 14
+      { values: [] },        // col 15
     ],
   },
 ]

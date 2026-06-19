@@ -79,6 +79,37 @@ body {
   }
 }
 
+/* Custom purple scrollbar for board container (all viewports) */
+.board-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #6949FF transparent;
+}
+.board-scroll-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.board-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.board-scroll-container::-webkit-scrollbar-thumb {
+  background: #6949FF;
+  border-radius: 4px;
+}
+.board-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #5536E6;
+}
+
+/* Hide scrollbar utility class */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+
+
 /* Nonogram Cell Flip Animation - True 3D Flip */
 @keyframes flip-reveal {
   0% {

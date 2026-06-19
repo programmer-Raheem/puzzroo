@@ -13,7 +13,7 @@ export type Difficulty = 'easy' | 'medium' | 'hard'
 
 export type ValidationStatus = 'incomplete' | 'completed' | 'invalid'
 
-export type GameStatus = 'playing' | 'won' | 'paused'
+export type GameStatus = 'playing' | 'won' | 'lost' | 'paused'
 
 export type ValidationMode = 'relaxed' | 'assisted' | 'challenge'
 

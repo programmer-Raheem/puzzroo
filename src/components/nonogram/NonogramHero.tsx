@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { images } from '@/lib/utils'
+import { useTheme } from '@/hooks/use-theme'
 
 interface NonogramHeroProps {
   backTo?: string // Optional custom back navigation path
@@ -12,7 +13,11 @@ interface NonogramHeroProps {
 
 export function NonogramHero({ backTo }: NonogramHeroProps = {}) {
   const router = useRouter()
+  const { theme } = useTheme()
   const [isNavigating, setIsNavigating] = useState(false)
+
+  // Get theme-aware nonogram image
+  const nonogramImage = theme === 'light' ? images.gameCards.nonogramWhite : images.gameCards.nonogram
 
   // Prevent scroll when loading overlay is active
   useEffect(() => {
@@ -55,7 +60,7 @@ export function NonogramHero({ backTo }: NonogramHeroProps = {}) {
             {/* Nonogram Image with background */}
             <div className="w-[129px] h-[129px] relative flex items-center justify-center bg-[#F0EDFF] dark:bg-[#1F222A] rounded-[6px] p-[14px]">
               <Image
-                src="/nonogram.svg"
+                src={nonogramImage}
                 alt="Nonogram"
                 width={101}
                 height={101}

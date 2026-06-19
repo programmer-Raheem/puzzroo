@@ -16,6 +16,7 @@ export function createEmptyGrid(size: GridSize): CellState[][] {
 /**
  * Calculate clues from a solution matrix
  * Returns array of consecutive filled cell counts per row/column
+ * CRITICAL: Returns empty array [] for lines with no filled cells (NEVER [0])
  */
 export function calculateClues(line: number[]): Clue {
   const values: number[] = []
@@ -34,8 +35,8 @@ export function calculateClues(line: number[]): Clue {
     values.push(count)
   }
   
-  // If no filled cells, return [0]
-  return { values: values.length > 0 ? values : [0] }
+  // Return empty array for lines with no filled cells
+  return { values }
 }
 
 /**
@@ -103,10 +104,11 @@ export function checkPuzzleCompletion(grid: CellState[][], solution: number[][])
 
 /**
  * Validate that zero-clue rows have no filled cells
+ * UPDATED: Empty array [] indicates no filled cells (not [0])
  */
 export function validateZeroClueRow(grid: CellState[][], rowIndex: number, clue: Clue): boolean {
-  // If clue is [0], row must be completely empty
-  if (clue.values.length === 1 && clue.values[0] === 0) {
+  // If clue is empty array, row must be completely empty
+  if (clue.values.length === 0) {
     return grid[rowIndex].every(cell => cell !== 'filled')
   }
   return true
@@ -114,10 +116,11 @@ export function validateZeroClueRow(grid: CellState[][], rowIndex: number, clue:
 
 /**
  * Validate that zero-clue columns have no filled cells
+ * UPDATED: Empty array [] indicates no filled cells (not [0])
  */
 export function validateZeroClueColumn(grid: CellState[][], colIndex: number, clue: Clue): boolean {
-  // If clue is [0], column must be completely empty
-  if (clue.values.length === 1 && clue.values[0] === 0) {
+  // If clue is empty array, column must be completely empty
+  if (clue.values.length === 0) {
     const column = grid.map(row => row[colIndex])
     return column.every(cell => cell !== 'filled')
   }
@@ -126,15 +129,16 @@ export function validateZeroClueColumn(grid: CellState[][], colIndex: number, cl
 
 /**
  * Validate that solution data respects zero-clue constraints
+ * UPDATED: Empty array [] indicates no filled cells (not [0])
  */
 export function validatePuzzleData(solution: number[][], rowClues: Clue[], columnClues: Clue[]): boolean {
   // Check rows with zero clues
   for (let row = 0; row < solution.length; row++) {
     const clue = rowClues[row]
-    if (clue.values.length === 1 && clue.values[0] === 0) {
+    if (clue.values.length === 0) {
       // Row must have no filled cells
       if (solution[row].some(cell => cell === 1)) {
-        console.error(`Invalid puzzle: Row ${row} has clue [0] but contains filled cells`)
+        console.error(`Invalid puzzle: Row ${row} has empty clue [] but contains filled cells`)
         return false
       }
     }
@@ -143,11 +147,11 @@ export function validatePuzzleData(solution: number[][], rowClues: Clue[], colum
   // Check columns with zero clues
   for (let col = 0; col < solution.length; col++) {
     const clue = columnClues[col]
-    if (clue.values.length === 1 && clue.values[0] === 0) {
+    if (clue.values.length === 0) {
       // Column must have no filled cells
       const column = solution.map(row => row[col])
       if (column.some(cell => cell === 1)) {
-        console.error(`Invalid puzzle: Column ${col} has clue [0] but contains filled cells`)
+        console.error(`Invalid puzzle: Column ${col} has empty clue [] but contains filled cells`)
         return false
       }
     }
@@ -158,20 +162,9 @@ export function validatePuzzleData(solution: number[][], rowClues: Clue[], colum
 
 /**
  * Validate a single row against its clue
- * Enhanced with zero-clue enforcement
  */
 export function validateRow(grid: CellState[][], rowIndex: number, expectedClue: Clue): ValidationStatus {
   const row = grid[rowIndex]
-  
-  // Zero-clue validation: if clue is [0], row must be completely empty
-  if (expectedClue.values.length === 1 && expectedClue.values[0] === 0) {
-    const hasFilledCells = row.some(cell => cell === 'filled')
-    if (hasFilledCells) {
-      return 'invalid' // Any filled cell in zero-clue row is invalid
-    }
-    return 'completed' // No filled cells = completed for zero-clue
-  }
-  
   const actualClue = calculateCluesFromGrid(row)
   
   // Compare clue values
@@ -189,20 +182,9 @@ export function validateRow(grid: CellState[][], rowIndex: number, expectedClue:
 
 /**
  * Validate a single column against its clue
- * Enhanced with zero-clue enforcement
  */
 export function validateColumn(grid: CellState[][], colIndex: number, expectedClue: Clue): ValidationStatus {
   const column = grid.map(row => row[colIndex])
-  
-  // Zero-clue validation: if clue is [0], column must be completely empty
-  if (expectedClue.values.length === 1 && expectedClue.values[0] === 0) {
-    const hasFilledCells = column.some(cell => cell === 'filled')
-    if (hasFilledCells) {
-      return 'invalid' // Any filled cell in zero-clue column is invalid
-    }
-    return 'completed' // No filled cells = completed for zero-clue
-  }
-  
   const actualClue = calculateCluesFromGrid(column)
   
   // Compare clue values

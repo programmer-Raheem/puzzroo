@@ -29,7 +29,6 @@ import {
   calculateProgress,
   isCellMistake,
   findHintPosition,
-  validatePuzzleData,
 } from '@/lib/nonogram/helpers'
 import { getRandomPuzzle, getPuzzleById } from '@/data/nonogram'
 import { 
@@ -68,6 +67,7 @@ export function useNonogram(initialPuzzleId?: string) {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [maxHints, setMaxHints] = useState(5)
   const [errorCell, setErrorCell] = useState<CellPosition | null>(null)
+  const [mistakeCount, setMistakeCount] = useState(0)
   
   // Drag state
   const [isDragging, setIsDragging] = useState(false)
@@ -79,37 +79,40 @@ export function useNonogram(initialPuzzleId?: string) {
   // Timer ref
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef = useRef<number | null>(null)
+  
+  // Guard to prevent duplicate click/tap actions (pointer events vs click event race condition)
+  const lastInteractionRef = useRef<{ row: number; col: number; timestamp: number } | null>(null)
+
 
   /**
    * Initialize a new puzzle
    */
   const initializePuzzle = useCallback((diff: Difficulty, loadSaved = true, puzzleId?: string) => {
-    // Try to load saved game first
+    // Try to load saved game first - but only if difficulty matches
     if (loadSaved && typeof window !== 'undefined') {
       const saved = loadGameState()
-      if (saved && saved.difficulty === diff) {
-        // If puzzleId is provided, find that specific puzzle, otherwise use random
-        let puzzle: PuzzleData
+      
+      // Only restore saved game if difficulty matches the requested difficulty
+      if (saved && saved.difficulty === diff && !puzzleId) {
+        // Find the saved puzzle
+        const puzzle = getPuzzleById(saved.puzzleId)
         
-        if (puzzleId) {
-          const foundPuzzle = getPuzzleById(puzzleId)
-          if (foundPuzzle) {
-            puzzle = foundPuzzle
-          } else {
-            console.warn(`Puzzle ${puzzleId} not found, using random puzzle`)
-            puzzle = getRandomPuzzle(diff)
-          }
-        } else {
-          puzzle = getRandomPuzzle(diff)
+        if (puzzle && puzzle.difficulty === diff) {
+          setCurrentPuzzle(puzzle)
+          setGrid(saved.grid)
+          setElapsedSeconds(saved.elapsedSeconds)
+          setHintsUsed(saved.hintsUsed)
+          setMaxHints(getHintLimits(diff))
+          setMistakeCount(saved.mistakeCount || 0)
+          setGameStatus('playing')
+          setDifficulty(diff)
+          return
         }
-        
-        setCurrentPuzzle(puzzle)
-        setGrid(saved.grid)
-        setElapsedSeconds(saved.elapsedSeconds)
-        setHintsUsed(saved.hintsUsed)
-        setMaxHints(getHintLimits(diff))
-        setGameStatus('playing')
-        return
+      }
+      
+      // If saved game doesn't match difficulty or puzzleId is specified, clear old state
+      if (saved && saved.difficulty !== diff) {
+        clearGameState()
       }
     }
 
@@ -126,14 +129,6 @@ export function useNonogram(initialPuzzleId?: string) {
       }
     } else {
       puzzle = getRandomPuzzle(diff)
-    }
-    
-    // Validate puzzle data integrity
-    const isValid = validatePuzzleData(puzzle.solution, puzzle.rowClues, puzzle.columnClues)
-    if (!isValid) {
-      console.error(`Puzzle ${puzzle.id} failed validation. Using fallback puzzle.`)
-      // Fallback to first easy puzzle or generate safe empty puzzle
-      puzzle = getRandomPuzzle('easy')
     }
     
     const emptyGrid = createEmptyGrid(puzzle.size)
@@ -154,6 +149,8 @@ export function useNonogram(initialPuzzleId?: string) {
     })
     setInputMode('fill')
     startTimeRef.current = null
+    setMistakeCount(0)
+    setDifficulty(diff)
   }, [])
 
   /**
@@ -211,11 +208,11 @@ export function useNonogram(initialPuzzleId?: string) {
         difficulty,
         elapsedSeconds,
         hintsUsed,
-        mistakeCount: 0,
+        mistakeCount,
         timestamp: Date.now(),
       })
     }
-  }, [grid, currentPuzzle, difficulty, elapsedSeconds, hintsUsed, gameStatus, isInitialized])
+  }, [grid, currentPuzzle, difficulty, elapsedSeconds, hintsUsed, mistakeCount, gameStatus, isInitialized])
 
   /**
    * Validation and progress tracking on grid change
@@ -268,6 +265,18 @@ export function useNonogram(initialPuzzleId?: string) {
   const handleCellClick = useCallback((position: CellPosition) => {
     if (gameStatus !== 'playing' || !currentPuzzle || isDragging) return
     
+    // Prevent double processing from race condition between pointer/drag and click handlers
+    const now = Date.now()
+    if (
+      lastInteractionRef.current &&
+      lastInteractionRef.current.row === position.row &&
+      lastInteractionRef.current.col === position.col &&
+      now - lastInteractionRef.current.timestamp < 350
+    ) {
+      return
+    }
+    lastInteractionRef.current = { row: position.row, col: position.col, timestamp: now }
+
     setSelectedCell(position)
     
     const newState = applyCellAction(position, inputMode)
@@ -279,23 +288,33 @@ export function useNonogram(initialPuzzleId?: string) {
       const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
       
       if (isMistake) {
-        // Show error feedback with shake
-        setGrid((prevGrid) => {
-          const newGrid = prevGrid.map((row) => [...row])
-          newGrid[position.row][position.col] = 'error'
-          return newGrid
-        })
-        
-        // Revert after shake animation (1 second)
-        setTimeout(() => {
+          // Count the mistake and check limit
+          setMistakeCount((prev) => {
+            const nextMistakes = prev + 1
+            const limit = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 2
+            if (nextMistakes >= limit) {
+              setGameStatus('lost')
+              clearGameState()
+            }
+            return nextMistakes
+          })
+          // Show error feedback with shake
           setGrid((prevGrid) => {
             const newGrid = prevGrid.map((row) => [...row])
-            newGrid[position.row][position.col] = 'empty'
+            newGrid[position.row][position.col] = 'error'
             return newGrid
           })
-        }, 1000)
-        return
-      }
+          
+          // Revert after shake animation (1 second)
+          setTimeout(() => {
+            setGrid((prevGrid) => {
+              const newGrid = prevGrid.map((row) => [...row])
+              newGrid[position.row][position.col] = 'empty'
+              return newGrid
+            })
+          }, 1000)
+          return
+        }
     }
     
     setGrid((prevGrid) => {
@@ -420,6 +439,9 @@ export function useNonogram(initialPuzzleId?: string) {
         const [rowStr, colStr] = cellKey.split('-')
         const position: CellPosition = { row: parseInt(rowStr), col: parseInt(colStr) }
         
+        // Mark as handled to prevent click handler from double-firing
+        lastInteractionRef.current = { row: position.row, col: position.col, timestamp: Date.now() }
+        
         const newState = applyCellAction(position, inputMode)
         
         // Validate if not returning to empty
@@ -429,6 +451,16 @@ export function useNonogram(initialPuzzleId?: string) {
           const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
           
           if (isMistake) {
+            // Count the mistake and check limit
+            setMistakeCount((prev) => {
+              const nextMistakes = prev + 1
+              const limit = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 2
+              if (nextMistakes >= limit) {
+                setGameStatus('lost')
+                clearGameState()
+              }
+              return nextMistakes
+            })
             // Show error feedback with shake
             setGrid((prevGrid) => {
               const newGrid = prevGrid.map((row) => [...row])
@@ -477,6 +509,7 @@ export function useNonogram(initialPuzzleId?: string) {
       setSelectedCell(null)
       setElapsedSeconds(0)
       setHintsUsed(0)
+      setMistakeCount(0)
       setGameStatus('playing')
       setRowValidation(Array(currentPuzzle.size).fill('incomplete'))
       setColumnValidation(Array(currentPuzzle.size).fill('incomplete'))
@@ -490,8 +523,13 @@ export function useNonogram(initialPuzzleId?: string) {
    * Start a new puzzle
    */
   const newPuzzle = useCallback((puzzleId?: string) => {
-    initializePuzzle(difficulty, false, puzzleId)
-  }, [difficulty, initializePuzzle])
+    // Use current puzzle's difficulty, not URL or state
+    // This ensures "New Puzzle" respects the mode you're currently playing
+    const currentDiff = currentPuzzle?.difficulty || difficulty
+    
+    // Initialize puzzle with CURRENT difficulty
+    initializePuzzle(currentDiff, false, puzzleId)
+  }, [currentPuzzle, difficulty, initializePuzzle])
 
   /**
    * Change difficulty
@@ -624,6 +662,8 @@ export function useNonogram(initialPuzzleId?: string) {
     hintsUsed,
     maxHints,
     errorCell,
+    mistakeCount,
+    maxMistakes: difficulty === 'easy' ? 5 : difficulty === 'medium' ? 3 : 2,
     isDragging,
     dragPreviewCells,
     inputMode,

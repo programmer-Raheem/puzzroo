@@ -34,12 +34,12 @@ const gamesData: GameCard[] = [
     imageAlt: 'Cross Math Game',
   },
   {
-    id: 'number-ninja',
-    title: 'NUMBER NINJA',
+    id: 'nonogram',
+    title: 'NONOGRAM',
     status: 'Unplayed',
-    image: images.gameCards.numberNinja,
-    imageLight: images.gameCards.numberNinjaWhite,
-    imageAlt: 'Number Ninja Game',
+    image: images.gameCards.nonogram,
+    imageLight: images.gameCards.nonogramWhite,
+    imageAlt: 'Nonogram Game',
   },
   {
     id: 'kakuro',
@@ -56,12 +56,12 @@ const gamesData: GameCard[] = [
     imageAlt: 'Dots Match Game',
   },
   {
-    id: 'nonogram',
-    title: 'NONOGRAM',
+    id: 'number-ninja',
+    title: 'NUMBER NINJA',
     status: 'Unplayed',
-    image: images.gameCards.nonogram,
-    imageLight: images.gameCards.nonogramWhite,
-    imageAlt: 'Nonogram Game',
+    image: images.gameCards.numberNinja,
+    imageLight: images.gameCards.numberNinjaWhite,
+    imageAlt: 'Number Ninja Game',
   },
 ]
 
