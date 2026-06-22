@@ -6,7 +6,7 @@ import Navbar from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/Footer'
 import { AccountSidebar } from '@/components/account/AccountSidebar'
 import { isLoggedIn, getCurrentUser, getLastLoginInfo } from '@/lib/auth/frontend-auth'
-import { Check, Activity, BarChart3, Monitor, MapPin, User } from 'lucide-react'
+import { Check, Activity, BarChart3, Monitor, MapPin } from 'lucide-react'
 
 export default function AccountInformationPage() {
   const router = useRouter()
@@ -17,11 +17,13 @@ export default function AccountInformationPage() {
   useEffect(() => {
     setMounted(true)
     
+    // Check if user is logged in
     if (!isLoggedIn()) {
       router.push('/login')
       return
     }
 
+    // Load user data
     const userData = getCurrentUser()
     const lastLogin = getLastLoginInfo()
     
@@ -38,203 +40,243 @@ export default function AccountInformationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAFAFA] via-purple-50/20 to-blue-50/10 dark:from-[#0F1014] dark:via-[#0F1014] dark:to-[#0F1014] transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300">
       <Navbar />
 
-      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[40px] md:py-[60px]">
+      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[15px] md:py-[30px]">
         <div className="flex gap-8">
+          {/* Sidebar */}
           <AccountSidebar />
 
+          {/* Main Content */}
           <main className="flex-1 min-w-0">
             {/* Header */}
             <div className="mb-8">
-              <h1 className="font-urbanist font-bold text-[36px] text-[#181A20] dark:text-white mb-2">
+              <h1 className="font-urbanist font-bold text-[32px] md:text-[40px] text-[#212121] dark:text-white mb-2">
                 {user.name}
               </h1>
-              <p className="font-urbanist text-[16px] text-[#616161] dark:text-[#9E9E9E]">
+              <p className="font-urbanist text-[16px] text-[#757575] dark:text-[#BDBDBD]">
                 Account Information
               </p>
             </div>
 
             {/* Account Details Card */}
-            <div className="bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] p-8 mb-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <User size={20} className="text-white" strokeWidth={2} />
-                </div>
-                <h2 className="font-urbanist font-bold text-[20px] text-[#181A20] dark:text-white">
-                  Account Details
-                </h2>
-              </div>
+            <div className="bg-white dark:bg-[#1F222A] rounded-2xl border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] p-6 md:p-8 mb-6">
+              <h2 className="font-urbanist font-bold text-[24px] text-[#212121] dark:text-white mb-6">
+                Account Details
+              </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-5">
                 {/* Name */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Full Name
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Name
                   </span>
-                  <span className="font-urbanist font-semibold text-[16px] text-[#181A20] dark:text-white">
+                  <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
                     {user.name}
                   </span>
                 </div>
 
                 {/* Joined Since */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Member Since
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Joined Since
                   </span>
-                  <span className="font-urbanist font-semibold text-[16px] text-[#181A20] dark:text-white">
+                  <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
                     {user.joinedDate}
                   </span>
                 </div>
 
                 {/* Account ID */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
                     Account ID
                   </span>
-                  <span className="font-urbanist font-mono text-[14px] text-[#6949FF] dark:text-[#A78BFA]">
-                    {user.id.slice(0, 12)}...
+                  <span className="font-urbanist font-mono text-[13px] text-[#212121] dark:text-white break-all">
+                    {user.id}
                   </span>
                 </div>
 
                 {/* Account Status */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Status
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Account Status
                   </span>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                    <span className="font-urbanist font-semibold text-[13px] text-white capitalize">
-                      {user.accountStatus}
+                  <span className="font-urbanist font-semibold text-[15px] text-green-600 dark:text-green-400 capitalize">
+                    {user.accountStatus}
+                  </span>
+                </div>
+
+                {/* Username */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Username
+                  </span>
+                  <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
+                    {user.username}
+                  </span>
+                </div>
+
+                {/* Email Address */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Email Address
+                  </span>
+                  <div className="flex flex-col items-start sm:items-end">
+                    <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white break-all">
+                      {user.email}
+                    </span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Check size={14} className="text-green-600 dark:text-green-400" strokeWidth={3} />
+                      <span className="font-urbanist text-[12px] text-green-600 dark:text-green-400 font-semibold">
+                        Verified
+                      </span>
+                    </div>
+                    <span className="font-urbanist text-[12px] text-[#757575] dark:text-[#BDBDBD] mt-1">
+                      Email address cannot be changed
                     </span>
                   </div>
                 </div>
 
-                {/* Username */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Username
+                {/* Password */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b border-[#E0E0E0] dark:border-[#35383F]">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-2 sm:mb-0">
+                    Password
                   </span>
-                  <span className="font-urbanist font-semibold text-[16px] text-[#181A20] dark:text-white">
-                    @{user.username}
-                  </span>
+                  <button className="w-full sm:w-auto px-6 py-2 bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[14px] transition-all duration-200 active:scale-95">
+                    Change
+                  </button>
                 </div>
 
-                {/* Subscription */}
-                <div className="p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Subscription
+                {/* Subscription Plan */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3">
+                  <span className="font-urbanist font-semibold text-[14px] text-[#757575] dark:text-[#BDBDBD] mb-1 sm:mb-0">
+                    Subscription Plan
                   </span>
-                  <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-purple-600 to-purple-500 rounded-full font-urbanist font-semibold text-[13px] text-white capitalize">
+                  <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white capitalize">
                     {user.subscriptionPlan}
                   </span>
                 </div>
 
-                {/* Email - Full Width */}
-                <div className="md:col-span-2 p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-2">
-                    Email Address
-                  </span>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-urbanist font-semibold text-[16px] text-[#181A20] dark:text-white">
-                      {user.email}
+                {/* Connected Accounts */}
+                <div className="pt-4">
+                  <h3 className="font-urbanist font-bold text-[16px] text-[#212121] dark:text-white mb-3">
+                    Connected Accounts
+                  </h3>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#181A20] rounded-xl">
+                    <div className="w-10 h-10 bg-white dark:bg-[#1F222A] rounded-lg flex items-center justify-center">
+                      <span className="text-[20px]">G</span>
+                    </div>
+                    <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
+                      Google
                     </span>
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500 rounded-full">
-                      <Check size={12} className="text-white" strokeWidth={3} />
-                      <span className="text-[11px] font-urbanist font-semibold text-white">Verified</span>
-                    </div>
-                  </div>
-                  <span className="font-urbanist text-[12px] text-[#9E9E9E] dark:text-[#757575]">
-                    Cannot be changed
-                  </span>
-                </div>
-
-                {/* Password - Full Width */}
-                <div className="md:col-span-2 p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-urbanist font-medium text-[13px] text-[#757575] dark:text-[#9E9E9E] block mb-1">
-                        Password
-                      </span>
-                      <span className="font-urbanist text-[14px] text-[#181A20] dark:text-white">
-                        ••••••••••••
-                      </span>
-                    </div>
-                    <button className="px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg font-urbanist font-semibold text-[14px] transition-all duration-200 active:scale-95">
-                      Change Password
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-5 bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] shadow-sm">
-                <Activity size={18} className="text-purple-600 mb-2" strokeWidth={2} />
-                <p className="font-urbanist text-[12px] text-[#757575] dark:text-[#9E9E9E] mb-1">Games Played</p>
-                <p className="font-urbanist font-bold text-[24px] text-[#181A20] dark:text-white">1</p>
-              </div>
+            {/* Game Statistics Card */}
+            <div className="bg-white dark:bg-[#1F222A] rounded-2xl border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] p-6 md:p-8 mb-6">
+              <h2 className="font-urbanist font-bold text-[24px] text-[#212121] dark:text-white mb-6">
+                Game Statistics
+              </h2>
 
-              <div className="p-5 bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] shadow-sm">
-                <Check size={18} className="text-green-600 mb-2" strokeWidth={2} />
-                <p className="font-urbanist text-[12px] text-[#757575] dark:text-[#9E9E9E] mb-1">Completed</p>
-                <p className="font-urbanist font-bold text-[24px] text-[#181A20] dark:text-white">0</p>
-              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity size={18} className="text-[#6949FF]" />
+                    <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#BDBDBD]">
+                      Games Played
+                    </span>
+                  </div>
+                  <p className="font-urbanist font-bold text-[28px] text-[#212121] dark:text-white">
+                    1
+                  </p>
+                </div>
 
-              <div className="p-5 bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] shadow-sm">
-                <Activity size={18} className="text-orange-600 mb-2" strokeWidth={2} />
-                <p className="font-urbanist text-[12px] text-[#757575] dark:text-[#9E9E9E] mb-1">Streak</p>
-                <p className="font-urbanist font-bold text-[24px] text-[#181A20] dark:text-white">0</p>
-              </div>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Check size={18} className="text-green-600" />
+                    <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#BDBDBD]">
+                      Completed
+                    </span>
+                  </div>
+                  <p className="font-urbanist font-bold text-[28px] text-[#212121] dark:text-white">
+                    0
+                  </p>
+                </div>
 
-              <div className="p-5 bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] shadow-sm">
-                <BarChart3 size={18} className="text-blue-600 mb-2" strokeWidth={2} />
-                <p className="font-urbanist text-[12px] text-[#757575] dark:text-[#9E9E9E] mb-1">Success Rate</p>
-                <p className="font-urbanist font-bold text-[24px] text-[#181A20] dark:text-white">0%</p>
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity size={18} className="text-orange-600" />
+                    <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#BDBDBD]">
+                      Current Streak
+                    </span>
+                  </div>
+                  <p className="font-urbanist font-bold text-[28px] text-[#212121] dark:text-white">
+                    0 days
+                  </p>
+                </div>
+
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 size={18} className="text-blue-600" />
+                    <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#BDBDBD]">
+                      Completion Rate
+                    </span>
+                  </div>
+                  <p className="font-urbanist font-bold text-[28px] text-[#212121] dark:text-white">
+                    0%
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white dark:bg-[#1A1D23] rounded-xl border border-purple-100 dark:border-[#2A2D35] p-8 shadow-sm">
-              <h2 className="font-urbanist font-bold text-[20px] text-[#181A20] dark:text-white mb-6">
+            {/* Recent Activity Card */}
+            <div className="bg-white dark:bg-[#1F222A] rounded-2xl border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] p-6 md:p-8">
+              <h2 className="font-urbanist font-bold text-[24px] text-[#212121] dark:text-white mb-6">
                 Recent Activity
               </h2>
 
               {loginInfo && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                    <span className="font-urbanist font-medium text-[14px] text-[#757575] dark:text-[#9E9E9E]">
-                      Last Login
-                    </span>
-                    <span className="font-urbanist font-semibold text-[15px] text-[#181A20] dark:text-white">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Last Login Card */}
+                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity size={18} className="text-white" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                        Last Login
+                      </span>
+                    </div>
+                    <p className="font-urbanist font-bold text-[20px] text-white">
                       {loginInfo.lastLogin}
-                    </span>
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                    <span className="font-urbanist font-medium text-[14px] text-[#757575] dark:text-[#9E9E9E]">
-                      Device
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <Monitor size={16} className="text-purple-600" />
-                      <span className="font-urbanist font-semibold text-[15px] text-[#181A20] dark:text-white">
-                        {loginInfo.device}
+                  {/* Device Card */}
+                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Monitor size={18} className="text-white" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                        Device
                       </span>
                     </div>
+                    <p className="font-urbanist font-bold text-[20px] text-white">
+                      {loginInfo.device}
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100/50 dark:border-purple-500/10">
-                    <span className="font-urbanist font-medium text-[14px] text-[#757575] dark:text-[#9E9E9E]">
-                      Location
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-purple-600" />
-                      <span className="font-urbanist font-semibold text-[15px] text-[#181A20] dark:text-white">
-                        {loginInfo.location}
+                  {/* Location Card */}
+                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin size={18} className="text-white" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                        Location
                       </span>
                     </div>
+                    <p className="font-urbanist font-bold text-[20px] text-white">
+                      {loginInfo.location}
+                    </p>
                   </div>
                 </div>
               )}

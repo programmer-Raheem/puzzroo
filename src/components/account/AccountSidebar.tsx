@@ -69,8 +69,8 @@ export function AccountSidebar() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-[280px] flex-shrink-0">
-        <div className="sticky top-[100px]">
-          <nav className="bg-gradient-to-br from-white via-purple-50/20 to-purple-50/40 dark:from-[#1A1D23] dark:via-[#1A1D23] dark:to-[#1A1D23] rounded-xl border border-purple-100/50 dark:border-[#2A2D35] overflow-hidden shadow-sm shadow-purple-500/5">
+        <div className="sticky top-[80px]">
+          <nav className="bg-gradient-to-br from-white via-purple-50/20 to-purple-50/40 dark:from-[#1A1D23] dark:via-[#1A1D23] dark:to-[#1A1D23] rounded-xl border border-purple-100/50 dark:border-[#2A2D35] overflow-hidden shadow-sm shadow-purple-500/5 min-h-[calc(100vh-120px)]">
             {menuItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -96,7 +96,7 @@ export function AccountSidebar() {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-5 py-4 text-[#616161] dark:text-[#9E9E9E] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border-t border-purple-100/50 dark:border-[#2A2D35] font-medium"
+              className="w-full flex items-center gap-3 px-5 py-4 text-[#616161] dark:text-[#9E9E9E] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border-t border-purple-100/50 dark:border-[#2A2D35] font-medium absolute bottom-0 left-0 right-0"
             >
               <LogOut size={20} strokeWidth={2} />
               <span className="font-urbanist text-[15px]">

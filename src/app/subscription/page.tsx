@@ -73,7 +73,7 @@ export default function SubscriptionPage() {
                     /month
                   </span>
                 </div>
-                <button className="w-full h-[48px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95 mb-4">
+                <button className="w-full h-[42px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[14px] transition-all duration-200 active:scale-95 mb-4">
                   Choose Monthly
                 </button>
                 <p className="font-urbanist text-[13px] text-[#757575] dark:text-[#BDBDBD] text-center">
@@ -106,7 +106,7 @@ export default function SubscriptionPage() {
                     Save 17%
                   </span>
                 </div>
-                <button className="w-full h-[48px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95 mb-4">
+                <button className="w-full h-[42px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[14px] transition-all duration-200 active:scale-95 mb-4">
                   Choose Yearly
                 </button>
                 <p className="font-urbanist text-[13px] text-[#757575] dark:text-[#BDBDBD] text-center">
@@ -127,7 +127,7 @@ export default function SubscriptionPage() {
                     /one-time
                   </span>
                 </div>
-                <button className="w-full h-[48px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[16px] transition-all duration-200 active:scale-95 mb-4">
+                <button className="w-full h-[42px] bg-[#6949FF] hover:bg-[#5536E6] text-white rounded-full font-urbanist font-semibold text-[14px] transition-all duration-200 active:scale-95 mb-4">
                   Get Lifetime Access
                 </button>
                 <p className="font-urbanist text-[13px] text-[#757575] dark:text-[#BDBDBD] text-center">
