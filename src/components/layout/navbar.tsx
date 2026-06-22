@@ -1,14 +1,44 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTheme } from '../../hooks/use-theme'
 import { images } from '@/lib/utils'
+import { isLoggedIn, getCurrentUser } from '@/lib/auth/frontend-auth'
+import { ProfileDropdown } from './ProfileDropdown'
 
 export function Navbar() {
   const { theme, toggleTheme, mounted } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+
+  // Check login status on mount and when component updates
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuth = isLoggedIn()
+      setLoggedIn(isAuth)
+      
+      if (isAuth) {
+        const userData = getCurrentUser()
+        if (userData) {
+          setUser({
+            name: userData.name,
+            email: userData.email,
+          })
+        }
+      } else {
+        setUser(null)
+      }
+    }
+
+    checkAuth()
+    
+    // Listen for storage changes (login/logout in other tabs)
+    window.addEventListener('storage', checkAuth)
+    return () => window.removeEventListener('storage', checkAuth)
+  }, [])
 
   return (
     <header className="sticky top-0 w-full bg-white dark:bg-[#181A20] transition-colors duration-300 relative z-50">
@@ -35,18 +65,33 @@ export function Navbar() {
 
           {/* RIGHT: Desktop Actions */}
           <div className="hidden md:flex items-center gap-[clamp(8px,1vw,16px)] -mr-[15px]">
+            {loggedIn && user ? (
+              <>
+                {/* Subscribe Button */}
+                <Link href="/subscription">
+                  <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
+                    Subscribe Us
+                  </button>
+                </Link>
 
-            <Link href="/signup">
-              <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
-                Sign up
-              </button>
-            </Link>
+                {/* Profile Dropdown */}
+                <ProfileDropdown userName={user.name} userEmail={user.email} />
+              </>
+            ) : (
+              <>
+                <Link href="/signup">
+                  <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
+                    Sign up
+                  </button>
+                </Link>
 
-            <Link href="/login">
-              <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
-                Login
-              </button>
-            </Link>
+                <Link href="/login">
+                  <button className="h-[38px] px-[clamp(16px,2vw,24px)] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[16px] font-semibold font-urbanist transition-all duration-200 active:scale-95">
+                    Login
+                  </button>
+                </Link>
+              </>
+            )}
 
             <button
               onClick={toggleTheme}
@@ -110,16 +155,39 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#181A20] border-t border-gray-200 dark:border-gray-800 z-50 shadow-lg">
           <div className="flex flex-col items-center gap-4 py-6">
-            <Link href="/login">
-              <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
-                Login
-              </button>
-            </Link>
-            <Link href="/signup">
-              <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
-                Sign up
-              </button>
-            </Link>
+            {loggedIn && user ? (
+              <>
+                <Link href="/subscription">
+                  <button 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200"
+                  >
+                    Subscribe Us
+                  </button>
+                </Link>
+                <Link href="/account-information">
+                  <button 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-[200px] h-[38px] rounded-full border-2 border-[#6949FF] text-[#6949FF] text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200"
+                  >
+                    My Account
+                  </button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
+                    Login
+                  </button>
+                </Link>
+                <Link href="/signup">
+                  <button className="w-[200px] h-[38px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white text-[14px] font-semibold font-urbanist transition-all active:scale-95 duration-200">
+                    Sign up
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

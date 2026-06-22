@@ -90,12 +90,29 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
   // Track mouse position for tooltip
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (hoveredCell && !isDragging) {
+      if (hoveredCell) {
         setMousePosition({ x: e.clientX, y: e.clientY })
+        
+        // During drag, update hoveredCell based on element under cursor
+        if (isDragging) {
+          const element = document.elementFromPoint(e.clientX, e.clientY)
+          if (element) {
+            const cellButton = element.closest('button[data-cell-position]')
+            if (cellButton) {
+              const positionData = cellButton.getAttribute('data-cell-position')
+              if (positionData) {
+                const [row, col] = positionData.split('-').map(Number)
+                if (!isNaN(row) && !isNaN(col)) {
+                  setHoveredCell({ row, col })
+                }
+              }
+            }
+          }
+        }
       }
     }
 
-    if (hoveredCell && !isDragging) {
+    if (hoveredCell) {
       window.addEventListener('mousemove', handleMouseMove)
       return () => window.removeEventListener('mousemove', handleMouseMove)
     } else {
@@ -729,7 +746,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
       </section>
 
       {/* Floating Tooltip - Follows Mouse Cursor */}
-      {hoveredCell && mousePosition && !isDragging && (
+      {hoveredCell && mousePosition && (
         <div
           className="fixed pointer-events-none transition-none"
           style={{

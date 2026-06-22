@@ -150,3 +150,24 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Dropdown Slide Down Animation */
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.15s ease-out;
+}
+
+/* Fade In Animation */
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}

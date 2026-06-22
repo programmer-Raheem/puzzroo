@@ -8,6 +8,7 @@ import { images } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import Navbar from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/Footer'
+import { login } from '@/lib/auth/frontend-auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   
   // Validation errors
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -43,15 +44,25 @@ export default function LoginPage() {
     if (!validate()) return
 
     setIsSubmitting(true)
-    // Simulate login API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    // Attempt login with frontend auth
+    const result = login(email, password)
+    
     setIsSubmitting(false)
-    setIsSuccess(true)
 
-    // Redirect to home after showing success message
-    setTimeout(() => {
-      router.push('/')
-    }, 2000)
+    if (result.success) {
+      setIsSuccess(true)
+      // Redirect to home after showing success message
+      setTimeout(() => {
+        router.push('/')
+        router.refresh() // Force navbar to update
+      }, 1500)
+    } else {
+      setErrors({ general: result.error || 'Invalid email or password' })
+    }
   }
 
   return (
@@ -91,6 +102,15 @@ export default function LoginPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* General Error Message */}
+              {errors.general && (
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="font-urbanist font-semibold text-[14px] text-red-600 dark:text-red-400 text-center">
+                    {errors.general}
+                  </p>
+                </div>
+              )}
+
               {/* Email Input */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="email" className="font-urbanist font-bold text-[14px] text-[#424242] dark:text-[#E0E0E0]">
