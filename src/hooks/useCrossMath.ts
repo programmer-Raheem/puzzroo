@@ -17,6 +17,7 @@ import {
   loadGameState,
   clearGameState,
 } from '@/lib/crossmath/storage'
+import { markPuzzleCompleted } from '@/lib/completion/universal'
 
 export function useCrossMath() {
   const searchParams = useSearchParams()
@@ -227,10 +228,20 @@ export function useCrossMath() {
 
     // Check win condition
     if (isBoardComplete(newBoard) && validateBoard(newBoard, currentPuzzle.solution)) {
+      // Mark puzzle as completed in universal completion system
+      const dateParam = searchParams.get('date')
+      // Convert date to full puzzle ID format: daily-crossmath-MM-DD-YY
+      const puzzleId = dateParam ? `daily-crossmath-${dateParam}` : currentPuzzle.id
+      markPuzzleCompleted('crossmath', puzzleId, {
+        time: time,
+        score: score,
+        difficulty: difficulty,
+      })
+      
       setGameStatus('won')
       clearGameState()
     }
-  }, [selectedCell, board, gameStatus, usedNumbersCount, score, mistakes, maxMistakes, currentPuzzle])
+  }, [selectedCell, board, gameStatus, usedNumbersCount, score, mistakes, maxMistakes, currentPuzzle, time, difficulty, searchParams])
 
   const commitCurrentInput = useCallback(() => {
     if (!selectedCell || gameStatus !== 'playing' || !currentPuzzle || !isTyping) return
@@ -302,10 +313,20 @@ export function useCrossMath() {
 
     // Check win condition
     if (isBoardComplete(newBoard) && validateBoard(newBoard, currentPuzzle.solution)) {
+      // Mark puzzle as completed in universal completion system
+      const dateParam = searchParams.get('date')
+      // Convert date to full puzzle ID format: daily-crossmath-MM-DD-YY
+      const puzzleId = dateParam ? `daily-crossmath-${dateParam}` : currentPuzzle.id
+      markPuzzleCompleted('crossmath', puzzleId, {
+        time: time,
+        score: score,
+        difficulty: difficulty,
+      })
+      
       setGameStatus('won')
       clearGameState()
     }
-  }, [selectedCell, board, gameStatus, currentPuzzle, isTyping, usedNumbersCount, score, mistakes, maxMistakes])
+  }, [selectedCell, board, gameStatus, currentPuzzle, isTyping, usedNumbersCount, score, mistakes, maxMistakes, time, difficulty, searchParams])
 
   const selectCell = useCallback((row: number, col: number) => {
     const cell = board[row]?.[col]
@@ -412,10 +433,20 @@ export function useCrossMath() {
 
     // Check win condition
     if (isBoardComplete(newBoard) && validateBoard(newBoard, currentPuzzle.solution)) {
+      // Mark puzzle as completed in universal completion system
+      const dateParam = searchParams.get('date')
+      // Convert date to full puzzle ID format: daily-crossmath-MM-DD-YY
+      const puzzleId = dateParam ? `daily-crossmath-${dateParam}` : currentPuzzle.id
+      markPuzzleCompleted('crossmath', puzzleId, {
+        time: time,
+        score: newScore,
+        difficulty: difficulty,
+      })
+      
       setGameStatus('won')
       clearGameState()
     }
-  }, [board, gameStatus, score, usedNumbersCount, currentPuzzle])
+  }, [board, gameStatus, score, usedNumbersCount, currentPuzzle, time, difficulty, searchParams])
 
   const handleKeyboardInput = useCallback((key: string) => {
     if (!selectedCell || gameStatus !== 'playing' || !currentPuzzle) return
@@ -511,6 +542,16 @@ export function useCrossMath() {
 
       // Check win condition
       if (isBoardComplete(newBoard) && validateBoard(newBoard, currentPuzzle.solution)) {
+        // Mark puzzle as completed in universal completion system
+        const dateParam = searchParams.get('date')
+        // Convert date to full puzzle ID format: daily-crossmath-MM-DD-YY
+        const puzzleId = dateParam ? `daily-crossmath-${dateParam}` : currentPuzzle.id
+        markPuzzleCompleted('crossmath', puzzleId, {
+          time: time,
+          score: isCorrect ? score + SCORING.CORRECT_ANSWER : Math.max(0, score + SCORING.WRONG_ANSWER),
+          difficulty: difficulty,
+        })
+        
         setGameStatus('won')
         clearGameState()
       }

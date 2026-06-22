@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 import { useSudoku } from '@/hooks/useSudoku'
@@ -15,7 +15,12 @@ import { images } from '@/lib/utils'
 
 export function SudokuGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isResetting, setIsResetting] = useState(false)
+  
+  // Check if this is from past puzzles or daily challenge (has date param)
+  const dateParam = searchParams?.get('date')
+  const isFromPastPuzzles = !!dateParam
   
   const {
     board,
@@ -123,21 +128,23 @@ export function SudokuGame() {
                 onNumberSelect={selectNumber}
               />
 
-              {/* New Game Button - Full width 230px */}
-              <button
-                onClick={() => handleNewGame(false)}
-                disabled={isResetting}
-                className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isResetting ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  'New Game'
-                )}
-              </button>
+              {/* New Game Button - Only show for regular games, not past puzzles/daily challenges */}
+              {!isFromPastPuzzles && (
+                <button
+                  onClick={() => handleNewGame(false)}
+                  disabled={isResetting}
+                  className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isResetting ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    'New Game'
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -193,21 +200,23 @@ export function SudokuGame() {
               mobile
             />
 
-            {/* New Game Button Mobile - No padding */}
-            <button
-              onClick={() => handleNewGame(false)}
-              disabled={isResetting}
-              className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isResetting ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  <span>Loading...</span>
-                </>
-              ) : (
-                'New Game'
-              )}
-            </button>
+            {/* New Game Button Mobile - Only show for regular games, not past puzzles/daily challenges */}
+            {!isFromPastPuzzles && (
+              <button
+                onClick={() => handleNewGame(false)}
+                disabled={isResetting}
+                className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isResetting ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  'New Game'
+                )}
+              </button>
+            )}
           </div>
 
         </div>
@@ -233,7 +242,7 @@ export function SudokuGame() {
             
             <Loader2 className="animate-spin text-[var(--color-primary)]" size={48} />
             <p className="font-urbanist text-lg font-semibold text-[var(--color-primary)]">
-              Loading New Game...
+              Replaying...
             </p>
           </div>
         </div>

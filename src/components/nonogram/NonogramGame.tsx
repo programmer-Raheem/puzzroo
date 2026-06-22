@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Lightbulb, Flag, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useNonogram } from '@/hooks/useNonogram'
 import { NonogramModal } from './NonogramModal'
@@ -11,6 +11,12 @@ import type { CellPosition } from '@/lib/nonogram/types'
 
 export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: string; onBackToSelection?: () => void }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Check if this is from past puzzles or daily challenge (has date param)
+  const dateParam = searchParams?.get('date')
+  const isFromPastPuzzles = !!dateParam
+  
   const {
     grid,
     selectedCell,
@@ -42,6 +48,8 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
   const [windowWidth, setWindowWidth] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(1) // 1 = 100%, 0.6 = 60%, 1.5 = 150%
   const [isPinching, setIsPinching] = useState(false)
+  const [hoveredCell, setHoveredCell] = useState<CellPosition | null>(null)
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
   const initialPinchDistance = useRef<number>(0)
   const initialZoomLevel = useRef<number>(1)
 
@@ -78,6 +86,22 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
     window.addEventListener('resize', updateWidth)
     return () => window.removeEventListener('resize', updateWidth)
   }, [])
+
+  // Track mouse position for tooltip
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (hoveredCell && !isDragging) {
+        setMousePosition({ x: e.clientX, y: e.clientY })
+      }
+    }
+
+    if (hoveredCell && !isDragging) {
+      window.addEventListener('mousemove', handleMouseMove)
+      return () => window.removeEventListener('mousemove', handleMouseMove)
+    } else {
+      setMousePosition(null)
+    }
+  }, [hoveredCell, isDragging])
 
   // Pinch zoom handler
   useEffect(() => {
@@ -229,24 +253,13 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
   return (
     <>
       <section className="w-full bg-white dark:bg-[#181A20] transition-colors duration-300">
-        <div className="w-full px-[20px] py-[40px] flex justify-center">
+        <div className="w-full px-[20px] pb-[40px] flex justify-center">
           <div className="w-full max-w-[717.5px] flex flex-col items-center gap-[20px]">
             
             {/* Timer and Progress Bar */}
             <div className="w-full flex flex-col gap-3">
               {/* Puzzle Metadata */}
               <div className="text-center space-y-1">
-                {/* Back Button (if callback provided) */}
-                {onBackToSelection && (
-                  <button
-                    onClick={onBackToSelection}
-                    className="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-[#F5F6FA] dark:bg-[#35383F] hover:bg-[#E8DFFF] dark:hover:bg-[#424242] text-[#6949FF] dark:text-[#8B6EFF] font-urbanist text-[14px] font-semibold transition-all duration-200"
-                  >
-                    <ArrowLeft size={16} />
-                    <span>Back to Puzzles</span>
-                  </button>
-                )}
-                
                 <h2 className="font-urbanist text-[24px] md:text-[28px] font-bold text-[#2B2F3A] dark:text-white">
                   {currentPuzzle.title}
                 </h2>
@@ -366,6 +379,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                   <div className="flex">
                   {currentPuzzle.columnClues.map((clue, colIdx) => {
                       const isCompleted = columnValidation[colIdx] === 'completed'
+                      const isHovered = hoveredCell?.col === colIdx
                       // A column with no clue values is an all-zero column (no fills needed)
                       const isEmptyCol = clue.values.length === 0
                       return (
@@ -377,7 +391,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                           {isEmptyCol ? (
                             // Show 0 for empty columns and make its background purple
                             <div
-                              className="flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white"
+                              className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white transition-all duration-150 ${isHovered ? 'ring-2 ring-[#6949FF] ring-offset-1' : ''}`}
                               style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                             >
                               <span className="font-urbanist font-bold text-white" style={{ fontSize: '11px' }}>0</span>
@@ -387,7 +401,9 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                               // value is used directly — no sentinel mapping needed
                               const bgColor = isCompleted
                                 ? 'bg-[#6949FF] dark:bg-[#6949FF]'
-                                : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
+                                : isHovered
+                                  ? 'bg-[#E8DFFF] dark:bg-[#3D2F7A]'
+                                  : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
                               const textColor = isCompleted
                                 ? 'text-white'
                                 : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
@@ -400,7 +416,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                               return (
                                 <div
                                   key={vIdx}
-                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
+                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-all duration-150`}
                                   style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                                 >
                                   <span
@@ -424,6 +440,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                   <div className="flex flex-col flex-shrink-0">
                     {currentPuzzle.rowClues.map((clue, rowIdx) => {
                       const isCompleted = rowValidation[rowIdx] === 'completed'
+                      const isHovered = hoveredCell?.row === rowIdx
                       // A row with no clue values is an all-zero row (no fills needed)
                       const isEmptyRow = clue.values.length === 0
                       return (
@@ -435,7 +452,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                           {isEmptyRow ? (
                             // Show 0 for empty rows and make its background purple
                             <div
-                              className="flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white"
+                              className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] bg-[var(--color-primary)] text-white transition-all duration-150 ${isHovered ? 'ring-2 ring-[#6949FF] ring-offset-1' : ''}`}
                               style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                             >
                               <span className="font-urbanist font-bold text-white" style={{ fontSize: '11px' }}>0</span>
@@ -445,7 +462,9 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                               // value is used directly — no sentinel mapping needed
                               const bgColor = isCompleted
                                 ? 'bg-[#6949FF] dark:bg-[#6949FF]'
-                                : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
+                                : isHovered
+                                  ? 'bg-[#E8DFFF] dark:bg-[#3D2F7A]'
+                                  : 'bg-[#F5F6FA] dark:bg-[#2A2D35]'
                               const textColor = isCompleted
                                 ? 'text-white'
                                 : 'text-[#2B2F3A] dark:text-[#E0E0E0]'
@@ -458,7 +477,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                               return (
                                 <div
                                   key={vIdx}
-                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-colors duration-300`}
+                                  className={`flex items-center justify-center border border-[#D0D3DC] dark:border-[#616161] ${bgColor} transition-all duration-150`}
                                   style={{ width: `${clueSize}px`, height: `${clueSize}px` }}
                                 >
                                   <span
@@ -499,6 +518,11 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                         const isRowCompleted = rowValidation[rowIdx] === 'completed'
                         const isColCompleted = columnValidation[colIdx] === 'completed'
                         const shouldBeGreyed = (isRowCompleted || isColCompleted) && cellState !== 'filled'
+                        const isNonClickable = shouldBeGreyed && cellState === 'empty'
+                        
+                        // Error cells are non-clickable
+                        const isErrorCell = cellState === 'error' || isError
+                        const isCellNonClickable = isNonClickable || isErrorCell
                         
                         const hasThickRight = (colIdx + 1) % 5 === 0 && colIdx !== currentPuzzle.size - 1
                         const hasThickBottom = (rowIdx + 1) % 5 === 0 && rowIdx !== currentPuzzle.size - 1
@@ -513,7 +537,7 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                         } else if (isInDragPreview) {
                           // Light purple preview during drag
                           bgClass = 'bg-[#A592FF] dark:bg-[#7C6BAE]'
-                        } else if (isError || cellState === 'error') {
+                        } else if (isErrorCell) {
                           bgClass = 'bg-white dark:bg-[#181A20]'
                           borderClass = 'ring-2 ring-red-500 ring-inset'
                         } else if (cellState === 'filled') {
@@ -532,27 +556,32 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                             data-cell-position={`${rowIdx}-${colIdx}`}
                             onClick={(e) => {
                               e.preventDefault()
-                              if (!isDragging && !isPinching) {
+                              if (!isDragging && !isPinching && !isCellNonClickable) {
                                 handleCellClick(position)
                               }
                             }}
                             onPointerDown={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
-                              if (!isPinching) {
+                              if (!isPinching && !isCellNonClickable) {
                                 handleDragStart(position)
                               }
                             }}
-                            disabled={gameStatus !== 'playing'}
-                            className={`flex items-center justify-center border-[1px] border-[#D0D3DC] dark:border-[#616161] ${bgClass} ${borderClass} ${
+                            onMouseEnter={() => setHoveredCell(position)}
+                            onMouseLeave={() => setHoveredCell(null)}
+                            disabled={gameStatus !== 'playing' || isCellNonClickable}
+                            className={`group relative flex items-center justify-center border-[1px] border-[#D0D3DC] dark:border-[#616161] ${bgClass} ${borderClass} ${
                               hasThickRight ? 'border-r-[3px] border-r-[#2B2F3A] dark:border-r-[#FAFAFA]' : ''
-                            } ${hasThickBottom ? 'border-b-[3px] border-b-[#2B2F3A] dark:border-b-[#FAFAFA]' : ''} transition-colors duration-150 cursor-crosshair focus:outline-none focus:ring-2 focus:ring-[#6949FF] disabled:cursor-not-allowed disabled:opacity-70 select-none cell-flip-container`}
+                            } ${hasThickBottom ? 'border-b-[3px] border-b-[#2B2F3A] dark:border-b-[#FAFAFA]' : ''} ${
+                              isCellNonClickable ? 'cursor-not-allowed' : 'cursor-crosshair'
+                            } transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#6949FF] disabled:cursor-not-allowed disabled:opacity-70 select-none cell-flip-container`}
                             style={{ 
                               width: `${cellSize}px`, 
                               height: `${cellSize}px`, 
                               touchAction: 'none',
                               transformStyle: 'preserve-3d',
                               perspective: '1000px',
+                              pointerEvents: isCellNonClickable ? 'none' : 'auto',
                             }}
                             aria-label={`Cell row ${rowIdx + 1}, column ${colIdx + 1}, ${cellState}`}
                           >
@@ -564,8 +593,8 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                                 fill="#EF4444"
                               />
                             )}
-                            {/* Show error X */}
-                            {(cellState === 'error' || isError) && !isInDragPreview && (
+                            {/* Show error X for wrong filled cells (permanently visible) */}
+                            {isErrorCell && !isInDragPreview && (
                               <svg width={cellSize * 0.5} height={cellSize * 0.5} viewBox="0 0 16 16" fill="none" className="pointer-events-none">
                                 <path d="M2 2L14 14M14 2L2 14" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
                               </svg>
@@ -669,13 +698,23 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
                 Reset
               </button>
               
-              {/* New Puzzle Button */}
+              {/* Replay Button */}
               <button
-                onClick={() => newPuzzle()}
+                onClick={resetPuzzle}
                 className="flex-1 h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[15px] transition-all duration-200 active:scale-95"
               >
-                New Puzzle
+                Replay
               </button>
+              
+              {/* New Puzzle Button - Only show for regular games, not past puzzles/daily challenges */}
+              {!isFromPastPuzzles && (
+                <button
+                  onClick={() => newPuzzle()}
+                  className="flex-1 h-[46px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[15px] transition-all duration-200 active:scale-95"
+                >
+                  New Puzzle
+                </button>
+              )}
             </div>
 
             {/* Keyboard Instructions */}
@@ -688,6 +727,25 @@ export function NonogramGame({ puzzleId, onBackToSelection }: { puzzleId?: strin
           </div>
         </div>
       </section>
+
+      {/* Floating Tooltip - Follows Mouse Cursor */}
+      {hoveredCell && mousePosition && !isDragging && (
+        <div
+          className="fixed pointer-events-none transition-none"
+          style={{
+            left: `${mousePosition.x}px`,
+            top: `${mousePosition.y + 20}px`,
+            transform: 'translateX(-50%)',
+            zIndex: 99999,
+          }}
+        >
+          <div className="bg-[#4A3A8C] dark:bg-[#3D2F7A] rounded-full px-4 py-1.5 shadow-xl border-2 border-[#6949FF] whitespace-nowrap">
+            <span className="font-urbanist text-[13px] font-semibold text-white">
+              R {hoveredCell.row + 1} | C {hoveredCell.col + 1}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Completion & Game Over Modal */}
       <NonogramModal

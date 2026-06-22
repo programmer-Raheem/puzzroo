@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Lock, Calendar, Loader2, X } from 'lucide-react'
+import { Lock, Calendar, Loader2, X, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { generatePastPuzzles } from '@/lib/dailyChallenge/generator'
 import { getChallengeStatus, getAccessiblePastChallenges } from '@/lib/dailyChallenge/storage'
@@ -13,6 +13,7 @@ import { FilterDropdown } from './FilterDropdown'
 import { CalendarModal } from './CalendarModal'
 import { images } from '@/lib/utils'
 import { useTheme } from '@/hooks/use-theme'
+import { getCompletedPuzzleIds } from '@/lib/completion/universal'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
@@ -27,8 +28,8 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   const [showCalendarModal, setShowCalendarModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [completedPuzzles, setCompletedPuzzles] = useState<Set<string>>(new Set())
   const accessibleCount = getAccessiblePastChallenges()
-  const router = useRouter()
   const { theme } = useTheme()
 
   // Format game title
@@ -58,6 +59,19 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
     }
   }, [isLoading])
 
+  // Save current URL for returning from daily challenge
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('puzzroo_return_url', `/past-puzzles/${gameId}`)
+    }
+  }, [gameId])
+
+  // Load completed puzzles from universal completion system
+  useEffect(() => {
+    const gameType = gameId === 'cross-math' ? 'crossmath' : gameId === 'sudoku' ? 'sudoku' : 'nonogram'
+    setCompletedPuzzles(getCompletedPuzzleIds(gameType as 'sudoku' | 'crossmath' | 'nonogram'))
+  }, [gameId])
+
   useEffect(() => {
     // Generate 8 past puzzles
     const generated = generatePastPuzzles(8, gameId as 'sudoku' | 'cross-math' | 'nonogram')
@@ -83,12 +97,25 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
       return p.dateString === selectedDate
     }
     
+    // Check if puzzle is completed from universal system
+    const isCompleted = completedPuzzles.has(p.id)
+    
     // If filter is 'all', show everything
     if (filter === 'all') return true
     
-    // If filter is 'not-started', show both not-started AND locked puzzles
+    // If filter is 'completed', show only completed puzzles
+    if (filter === 'completed') {
+      return isCompleted && p.status !== 'locked'
+    }
+    
+    // If filter is 'not-started', show not-started AND locked puzzles (but NOT completed)
     if (filter === 'not-started') {
-      return p.status === 'not-started' || p.status === 'locked'
+      return (p.status === 'not-started' || p.status === 'locked') && !isCompleted
+    }
+    
+    // If filter is 'in-progress', show in-progress (but NOT completed)
+    if (filter === 'in-progress') {
+      return p.status === 'in-progress' && !isCompleted
     }
     
     // Otherwise, match the exact status
@@ -121,11 +148,11 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
           </div>
 
           {/* Main Container with Border */}
-          <div className="border-[0.95px] border-[#979797] dark:border-[#E0E0E0] rounded-3xl p-6 md:p-10">
+          <div className="border-[0.95px] border-[#979797] dark:border-[#E0E0E0] rounded-3xl pt-4 pb-4 pl-3 pr-3 md:p-10">
             <div className="flex flex-col gap-6">
 
               {/* Filter + Controls Container */}
-              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center flex-wrap">
+              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center flex-wrap px-0">
                 <div className="w-full md:w-auto">
                   <FilterDropdown value={filter} onChange={setFilter} />
                 </div>
@@ -161,22 +188,24 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
                   </p>
                 </div>
                 
-                <button 
-                  onClick={() => console.log('Navigate to registration')}
-                  className="px-6 py-2 rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[14px] md:text-[16px] transition-all duration-200 active:scale-95 whitespace-nowrap"
-                >
-                  Register Now
-                </button>
+                <Link href="/signup">
+                  <button 
+                    className="px-6 py-2 rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-[14px] md:text-[16px] transition-all duration-200 active:scale-95 whitespace-nowrap"
+                  >
+                    Register Now
+                  </button>
+                </Link>
               </div>
 
               {/* Past Puzzle Grid - 1 column mobile, 4 columns desktop */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-7 lg:gap-[30px]">
-                {filteredPuzzles.map((puzzle, index) => (
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-7 lg:gap-[30px]  py-4 md:px-0 md:py-0">
+                {filteredPuzzles.map((puzzle) => (
                   <PuzzleCard
                     key={puzzle.id}
                     puzzle={puzzle}
                     gameIcon={gameIcon}
                     isLocked={puzzle.status === 'locked'}
+                    isCompleted={completedPuzzles.has(puzzle.id)}
                     onLockedClick={() => setShowAccessModal(true)}
                     onPlayClick={setIsLoading}
                   />
@@ -247,12 +276,17 @@ interface PuzzleCardProps {
   puzzle: DailyChallenge
   gameIcon: string
   isLocked: boolean
+  isCompleted: boolean
   onLockedClick: () => void
   onPlayClick: (loading: boolean) => void
 }
 
-function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: PuzzleCardProps) {
+function PuzzleCard({ puzzle, gameIcon, isLocked, isCompleted, onLockedClick, onPlayClick }: PuzzleCardProps) {
   const router = useRouter()
+  
+  // Determine actual status - completed overrides other statuses
+  const actualStatus = isCompleted && !isLocked ? 'completed' : puzzle.status
+  
   const statusColors = {
     'completed': 'text-[#22C55E]',
     'in-progress': 'text-[#FF9800]',
@@ -346,15 +380,27 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
     onPlayClick(true)
     // Show loading for 2-3 seconds
     await new Promise(resolve => setTimeout(resolve, 2500))
-    // Route directly to game page (not game lobby)
-    // Add skipSelection=true for nonogram to bypass puzzle selection
-    const gameUrl = puzzle.gameId === 'sudoku' ? '/sudoku' : puzzle.gameId === 'cross-math' ? '/cross-math' : puzzle.gameId === 'nonogram' ? '/nonogram?skipSelection=true' : '/sudoku'
+    // Route directly to game page with date in URL
+    const gameUrl = puzzle.gameId === 'sudoku' 
+      ? `/sudoku?date=${puzzle.dateString}` 
+      : puzzle.gameId === 'cross-math' 
+        ? `/cross-math?date=${puzzle.dateString}` 
+        : puzzle.gameId === 'nonogram' 
+          ? `/nonogram?date=${puzzle.dateString}&skipSelection=true` 
+          : '/sudoku'
     router.push(gameUrl)
   }
 
   return (
-    <div className="bg-white dark:bg-[#1F222A] border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] rounded-2xl p-5 flex flex-col gap-4 hover:border-[#6949FF] transition-all duration-300 group"
+    <div className="relative bg-white dark:bg-[#1F222A] border-[1.5px] border-[#E0E0E0] dark:border-[#35383F] rounded-2xl p-5 flex flex-col gap-4 hover:border-[#6949FF] transition-all duration-300 group"
     >
+      {/* Completion Badge */}
+      {isCompleted && !isLocked && (
+        <div className="absolute top-3 right-3 bg-[#22C55E] text-white rounded-full p-1.5 shadow-lg z-10">
+          <Check size={16} strokeWidth={3} />
+        </div>
+      )}
+      
       {/* Top Icon */}
       <div className="flex justify-center">
         <div className="w-20 h-20 bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl flex items-center justify-center group-hover:shadow-md group-hover:shadow-purple-500/20 transition-shadow duration-300">
@@ -394,8 +440,8 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, onLockedClick, onPlayClick }: 
         </div>
         <div className="flex items-center justify-between py-1">
           <span className="font-urbanist text-[#757575] dark:text-[#BDBDBD]">Status</span>
-          <span className={`font-urbanist font-bold text-[11px] md:text-[12px] ${statusColors[puzzle.status]}`}>
-            {statusLabels[puzzle.status]}
+          <span className={`font-urbanist font-bold text-[11px] md:text-[12px] ${statusColors[actualStatus]}`}>
+            {statusLabels[actualStatus]}
           </span>
         </div>
       </div>

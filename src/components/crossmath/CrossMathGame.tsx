@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 import { useCrossMath } from '@/hooks/useCrossMath'
@@ -16,8 +16,13 @@ import { Difficulty } from '@/lib/crossmath/types'
 
 export function CrossMathGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isResetting, setIsResetting] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  
+  // Check if this is from past puzzles or daily challenge (has date param)
+  const dateParam = searchParams?.get('date')
+  const isFromPastPuzzles = !!dateParam
   
   const {
     board,
@@ -157,21 +162,23 @@ export function CrossMathGame() {
                 requiredNumbersCount={requiredNumbersCount}
               />
 
-              {/* New Game Button */}
-              <button
-                onClick={handleNewGame}
-                disabled={isResetting}
-                className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isResetting ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  'New Game'
-                )}
-              </button>
+              {/* New Game Button - Only show for regular games, not past puzzles/daily challenges */}
+              {!isFromPastPuzzles && (
+                <button
+                  onClick={handleNewGame}
+                  disabled={isResetting}
+                  className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isResetting ? (
+                    <>
+                      <Loader2 className="animate-spin" size={20} />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    'New Game'
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -224,21 +231,23 @@ export function CrossMathGame() {
               mobile
             />
 
-            {/* New Game Button Mobile */}
-            <button
-              onClick={handleNewGame}
-              disabled={isResetting}
-              className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isResetting ? (
-                <>
-                  <Loader2 className="animate-spin" size={20} />
-                  <span>Loading...</span>
-                </>
-              ) : (
-                'New Game'
-              )}
-            </button>
+            {/* New Game Button Mobile - Only show for regular games, not past puzzles/daily challenges */}
+            {!isFromPastPuzzles && (
+              <button
+                onClick={handleNewGame}
+                disabled={isResetting}
+                className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isResetting ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  'New Game'
+                )}
+              </button>
+            )}
           </div>
 
         </div>

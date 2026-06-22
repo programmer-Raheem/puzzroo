@@ -36,17 +36,13 @@ export function NonogramModal({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        if (isWin) {
-          onNewPuzzle()
-        } else {
-          onPlayAgain()
-        }
+        onPlayAgain()
       }
     }
 
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
-  }, [isOpen, isWin, onNewPuzzle, onPlayAgain])
+  }, [isOpen, onPlayAgain])
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -71,7 +67,7 @@ export function NonogramModal({
         className={`fixed inset-0 bg-black/50 dark:bg-black/70 z-50 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={isWin ? onNewPuzzle : onPlayAgain}
+        onClick={onPlayAgain}
       />
 
       {/* Modal */}
@@ -94,7 +90,7 @@ export function NonogramModal({
             
             {/* Close button */}
             <button
-              onClick={isWin ? onNewPuzzle : onPlayAgain}
+              onClick={onPlayAgain}
               className="absolute top-2 right-2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
               aria-label="Close modal"
             >
@@ -190,16 +186,10 @@ export function NonogramModal({
               {isWin ? (
                 <>
                   <button
-                    onClick={onNewPuzzle}
+                    onClick={onPlayAgain}
                     className="w-full h-[40px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
                   >
-                    New Puzzle
-                  </button>
-                  <button
-                    onClick={onPlayAgain}
-                    className="w-full h-[40px] rounded-full bg-white dark:bg-[#35383F] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] dark:text-white hover:text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none border border-[#E0E0E0] dark:border-[#424242] hover:border-[#6949FF]"
-                  >
-                    Play Again
+                    Replay
                   </button>
                 </>
               ) : (
@@ -209,12 +199,6 @@ export function NonogramModal({
                     className="w-full h-[40px] rounded-full bg-[#6949FF] hover:bg-[#5536E6] text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6949FF] focus:ring-offset-2"
                   >
                     Try Again
-                  </button>
-                  <button
-                    onClick={onNewPuzzle}
-                    className="w-full h-[40px] rounded-full bg-white dark:bg-[#35383F] hover:bg-[#6949FF] dark:hover:bg-[#6949FF] text-[#6949FF] dark:text-white hover:text-white font-urbanist font-bold text-sm transition-all duration-200 active:scale-[0.98] focus:outline-none border border-[#E0E0E0] dark:border-[#424242] hover:border-[#6949FF]"
-                  >
-                    New Puzzle
                   </button>
                 </>
               )}

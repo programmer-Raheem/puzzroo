@@ -93,7 +93,7 @@ export function DifficultyTabs({
               {difficulty}
             </span>
             {/* Grey background line */}
-            <div className="grey-line w-[64px] sm:w-[80px] md:w-[84px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
+            <div className="grey-line w-[78px] sm:w-[80px] md:w-[84px] h-[2px] bg-[#EEEEEE] rounded-full"></div>
           </button>
         ))}
         

@@ -42,6 +42,7 @@ import {
   saveDifficultyPreference,
   loadDifficultyPreference,
 } from '@/lib/sudoku/storage'
+import { markPuzzleCompleted } from '@/lib/completion/universal'
 
 export function useSudoku() {
   const router = useRouter()
@@ -348,6 +349,16 @@ export function useSudoku() {
           console.log('🎉 PUZZLE COMPLETED! All Sudoku rules satisfied.')
           setIsWinAnimating(true)
           
+          // Mark puzzle as completed in universal completion system
+          const dateParam = searchParams.get('date')
+          // Convert date to full puzzle ID format: daily-sudoku-MM-DD-YY  
+          const puzzleId = dateParam ? `daily-sudoku-${dateParam}` : gameState.puzzleId
+          markPuzzleCompleted('sudoku', puzzleId, {
+            time: gameState.time,
+            score: gameState.score + 10,
+            difficulty: difficulty,
+          })
+          
           setTimeout(() => {
             setGameState((prev) => ({ ...prev, gameStatus: 'won' }))
             setIsWinAnimating(false)
@@ -444,6 +455,16 @@ export function useSudoku() {
     if (isBoardComplete(newBoard) && isValidCompletedBoard(newBoard)) {
       console.log('🎉 PUZZLE COMPLETED! All Sudoku rules satisfied.')
       setIsWinAnimating(true)
+      
+      // Mark puzzle as completed in universal completion system
+      const dateParam = searchParams.get('date')
+      // Convert date to full puzzle ID format: daily-sudoku-MM-DD-YY
+      const puzzleId = dateParam ? `daily-sudoku-${dateParam}` : gameState.puzzleId
+      markPuzzleCompleted('sudoku', puzzleId, {
+        time: gameState.time,
+        score: gameState.score - 20,
+        difficulty: difficulty,
+      })
       
       setTimeout(() => {
         setGameState((prev) => ({ ...prev, gameStatus: 'won' }))

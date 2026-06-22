@@ -38,7 +38,7 @@ import {
   updateStatsOnCompletion,
   getHintLimits,
 } from '@/lib/nonogram/storage'
-import { markPuzzleCompleted } from '@/lib/nonogram/completion'
+import { markPuzzleCompleted } from '@/lib/completion/universal'
 
 export function useNonogram(initialPuzzleId?: string) {
   const searchParams = useSearchParams()
@@ -237,8 +237,15 @@ export function useNonogram(initialPuzzleId?: string) {
       setGameStatus('won')
       updateStatsOnCompletion(elapsedSeconds)
       
-      // Mark puzzle as completed in the tracking system
-      markPuzzleCompleted(currentPuzzle.id, elapsedSeconds, hintsUsed)
+      // Mark puzzle as completed in universal tracking system
+      const dateParam = searchParams.get('date')
+      // Convert date to full puzzle ID format: daily-nonogram-MM-DD-YY
+      const puzzleId = dateParam ? `daily-nonogram-${dateParam}` : currentPuzzle.id
+      markPuzzleCompleted('nonogram', puzzleId, {
+        time: elapsedSeconds,
+        hintsUsed: hintsUsed,
+        difficulty: currentPuzzle.difficulty,
+      })
       
       clearGameState()
     }
@@ -254,7 +261,7 @@ export function useNonogram(initialPuzzleId?: string) {
       // Fill Mode: empty <-> filled
       return currentState === 'filled' ? 'empty' : 'filled'
     } else {
-      // Mark Mode: empty <-> marked
+      // Mark Mode: empty <-> marked (no validation needed for flags)
       return currentState === 'marked' ? 'empty' : 'marked'
     }
   }, [grid])
@@ -281,8 +288,8 @@ export function useNonogram(initialPuzzleId?: string) {
     
     const newState = applyCellAction(position, inputMode)
     
-    // Validate if not returning to empty and assisted mode is on
-    if (newState !== 'empty' && validationMode === 'assisted') {
+    // Only validate Fill mode - Mark mode (flags) can be placed anywhere
+    if (inputMode === 'fill' && newState === 'filled' && validationMode === 'assisted') {
       const tempGrid = grid.map(row => [...row])
       tempGrid[position.row][position.col] = newState
       const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
@@ -298,21 +305,12 @@ export function useNonogram(initialPuzzleId?: string) {
             }
             return nextMistakes
           })
-          // Show error feedback with shake
+          // Show error feedback permanently (don't revert)
           setGrid((prevGrid) => {
             const newGrid = prevGrid.map((row) => [...row])
             newGrid[position.row][position.col] = 'error'
             return newGrid
           })
-          
-          // Revert after shake animation (1 second)
-          setTimeout(() => {
-            setGrid((prevGrid) => {
-              const newGrid = prevGrid.map((row) => [...row])
-              newGrid[position.row][position.col] = 'empty'
-              return newGrid
-            })
-          }, 1000)
           return
         }
     }
@@ -444,8 +442,8 @@ export function useNonogram(initialPuzzleId?: string) {
         
         const newState = applyCellAction(position, inputMode)
         
-        // Validate if not returning to empty
-        if (newState !== 'empty' && validationMode === 'assisted' && currentPuzzle) {
+        // Only validate Fill mode during drag - Mark mode (flags) can be placed anywhere
+        if (inputMode === 'fill' && newState === 'filled' && validationMode === 'assisted' && currentPuzzle) {
           const tempGrid = grid.map(row => [...row])
           tempGrid[position.row][position.col] = newState
           const isMistake = isCellMistake(tempGrid, currentPuzzle.solution, position)
@@ -461,21 +459,12 @@ export function useNonogram(initialPuzzleId?: string) {
               }
               return nextMistakes
             })
-            // Show error feedback with shake
+            // Show error feedback permanently (don't revert)
             setGrid((prevGrid) => {
               const newGrid = prevGrid.map((row) => [...row])
               newGrid[position.row][position.col] = 'error'
               return newGrid
             })
-            
-            // Revert after shake animation
-            setTimeout(() => {
-              setGrid((prevGrid) => {
-                const newGrid = prevGrid.map((row) => [...row])
-                newGrid[position.row][position.col] = 'empty'
-                return newGrid
-              })
-            }, 1000)
             return
           }
         }

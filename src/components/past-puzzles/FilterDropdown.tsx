@@ -43,7 +43,7 @@ export function FilterDropdown({ value, onChange }: FilterDropdownProps) {
               key={option.value}
               onClick={() => onChange(option.value)}
               className={`
-                flex-1 px-3 py-2 rounded-md font-urbanist font-medium text-[12px] transition-all
+                flex-1 px-1 py-2 rounded-md font-urbanist font-medium text-[12px] transition-all
                 ${value === option.value
                   ? 'bg-[#6949FF] text-white shadow-md'
                   : 'bg-transparent text-[#424242] dark:text-[#E0E0E0] hover:bg-white/50 dark:hover:bg-[#2D2640]'

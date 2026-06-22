@@ -38,7 +38,15 @@ export function NonogramHero({ backTo }: NonogramHeroProps = {}) {
     setIsNavigating(true)
     // Show loading for 1 second
     await new Promise(resolve => setTimeout(resolve, 1000))
-    router.push(backTo || '/game/nonogram')
+    
+    // Check for return URL from past puzzles
+    const returnUrl = typeof window !== 'undefined' ? sessionStorage.getItem('puzzroo_return_url') : null
+    if (returnUrl) {
+      sessionStorage.removeItem('puzzroo_return_url')
+      router.push(returnUrl)
+    } else {
+      router.push(backTo || '/game/nonogram')
+    }
   }
 
   return (
