@@ -70,33 +70,35 @@ export function AccountSidebar() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-[280px] flex-shrink-0">
         <div className="sticky top-[80px]">
-          <nav className="bg-gradient-to-br from-white via-purple-50/20 to-purple-50/40 dark:from-[#1A1D23] dark:via-[#1A1D23] dark:to-[#1A1D23] rounded-xl border border-purple-100/50 dark:border-[#2A2D35] overflow-hidden shadow-sm shadow-purple-500/5 min-h-[calc(100vh-120px)]">
-            {menuItems.map((item) => {
-              const Icon = item.icon
-              const active = isActive(item.href)
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-5 py-4 transition-all duration-200 border-l-4 ${
-                    active
-                      ? 'bg-gradient-to-r from-purple-100/70 via-purple-50/50 to-transparent dark:from-[#6949FF]/15 dark:via-[#6949FF]/8 dark:to-transparent border-l-[#6949FF] text-[#6949FF] font-semibold'
-                      : 'border-l-transparent text-[#616161] dark:text-[#9E9E9E] hover:bg-purple-50/30 dark:hover:bg-[#6949FF]/5 font-medium'
-                  }`}
-                >
-                  <Icon size={20} strokeWidth={2} />
-                  <span className="font-urbanist text-[15px]">
-                    {item.label}
-                  </span>
-                </Link>
-              )
-            })}
+          <nav className="bg-gradient-to-br from-white via-purple-50/20 to-purple-50/40 dark:from-[#1A1D23] dark:via-[#1A1D23] dark:to-[#1A1D23] rounded-xl border border-purple-100/50 dark:border-[#2A2D35] overflow-hidden shadow-sm shadow-purple-500/5 h-[90vh] flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-5 py-4 transition-all duration-200 border-l-4 ${
+                      active
+                        ? 'bg-gradient-to-r from-purple-100/70 via-purple-50/50 to-transparent dark:from-[#6949FF]/15 dark:via-[#6949FF]/8 dark:to-transparent border-l-[#6949FF] text-[#6949FF] font-semibold'
+                        : 'border-l-transparent text-[#616161] dark:text-[#9E9E9E] hover:bg-purple-50/30 dark:hover:bg-[#6949FF]/5 font-medium'
+                    }`}
+                  >
+                    <Icon size={20} strokeWidth={2} />
+                    <span className="font-urbanist text-[15px]">
+                      {item.label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
             
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-5 py-4 text-[#616161] dark:text-[#9E9E9E] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border-t border-purple-100/50 dark:border-[#2A2D35] font-medium absolute bottom-0 left-0 right-0"
+              className="w-full flex items-center gap-3 px-5 py-4 text-[#616161] dark:text-[#9E9E9E] hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border-t border-purple-100/50 dark:border-[#2A2D35] font-medium"
             >
               <LogOut size={20} strokeWidth={2} />
               <span className="font-urbanist text-[15px]">

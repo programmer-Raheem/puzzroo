@@ -4,12 +4,13 @@
  * SSR-safe with hydration protection
  */
 
-export type GameType = 'sudoku' | 'crossmath' | 'nonogram'
+export type GameType = 'sudoku' | 'crossmath' | 'nonogram' | 'tangram'
 
 const STORAGE_KEYS = {
   sudoku: 'puzzroo_sudoku_completed',
   crossmath: 'puzzroo_crossmath_completed',
   nonogram: 'puzzroo_nonogram_completed',
+  tangram: 'puzzroo_tangram_completed',
 } as const
 
 export interface CompletionRecord {

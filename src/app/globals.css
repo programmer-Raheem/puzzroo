@@ -171,3 +171,25 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
+
+/* Tangram Success Pulse Animation */
+@keyframes success-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
+.animate-successPulse {
+  animation: success-pulse 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

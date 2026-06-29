@@ -1,59 +1,19 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Navbar from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/Footer'
-import { AccountSidebar } from '@/components/account/AccountSidebar'
-import { isLoggedIn, getCurrentUser, getLastLoginInfo } from '@/lib/auth/frontend-auth'
+import { AccountLayout } from '@/components/account/AccountLayout'
+import { getCurrentUser, getLastLoginInfo } from '@/lib/auth/frontend-auth'
 import { Check, Activity, BarChart3, Monitor, MapPin } from 'lucide-react'
 
 export default function AccountInformationPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [loginInfo, setLoginInfo] = useState<any>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    
-    // Check if user is logged in
-    if (!isLoggedIn()) {
-      router.push('/login')
-      return
-    }
-
-    // Load user data
-    const userData = getCurrentUser()
-    const lastLogin = getLastLoginInfo()
-    
-    if (userData) {
-      setUser(userData)
-    }
-    if (lastLogin) {
-      setLoginInfo(lastLogin)
-    }
-  }, [router])
-
-  if (!mounted || !user) {
-    return null
-  }
+  const user = getCurrentUser()
+  const loginInfo = getLastLoginInfo()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300">
-      <Navbar />
-
-      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[15px] md:py-[30px]">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <AccountSidebar />
-
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+    <AccountLayout>
             {/* Header */}
             <div className="mb-8">
               <h1 className="font-urbanist font-bold text-[32px] md:text-[40px] text-[#212121] dark:text-white mb-2">
-                {user.name}
+                {user?.name || 'User'}
               </h1>
               <p className="font-urbanist text-[16px] text-[#757575] dark:text-[#BDBDBD]">
                 Account Information
@@ -73,7 +33,7 @@ export default function AccountInformationPage() {
                     Name
                   </span>
                   <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
-                    {user.name}
+                    {user?.name || 'N/A'}
                   </span>
                 </div>
 
@@ -83,7 +43,7 @@ export default function AccountInformationPage() {
                     Joined Since
                   </span>
                   <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
-                    {user.joinedDate}
+                    {user?.joinedDate || 'N/A'}
                   </span>
                 </div>
 
@@ -93,7 +53,7 @@ export default function AccountInformationPage() {
                     Account ID
                   </span>
                   <span className="font-urbanist font-mono text-[13px] text-[#212121] dark:text-white break-all">
-                    {user.id}
+                    {user?.id || 'N/A'}
                   </span>
                 </div>
 
@@ -103,7 +63,7 @@ export default function AccountInformationPage() {
                     Account Status
                   </span>
                   <span className="font-urbanist font-semibold text-[15px] text-green-600 dark:text-green-400 capitalize">
-                    {user.accountStatus}
+                    {user?.accountStatus || 'Active'}
                   </span>
                 </div>
 
@@ -113,7 +73,7 @@ export default function AccountInformationPage() {
                     Username
                   </span>
                   <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white">
-                    {user.username}
+                    {user?.username || 'N/A'}
                   </span>
                 </div>
 
@@ -124,7 +84,7 @@ export default function AccountInformationPage() {
                   </span>
                   <div className="flex flex-col items-start sm:items-end">
                     <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white break-all">
-                      {user.email}
+                      {user?.email || 'N/A'}
                     </span>
                     <div className="flex items-center gap-1 mt-1">
                       <Check size={14} className="text-green-600 dark:text-green-400" strokeWidth={3} />
@@ -154,7 +114,7 @@ export default function AccountInformationPage() {
                     Subscription Plan
                   </span>
                   <span className="font-urbanist font-semibold text-[15px] text-[#212121] dark:text-white capitalize">
-                    {user.subscriptionPlan}
+                    {user?.subscriptionPlan || 'Free'}
                   </span>
                 </div>
 
@@ -241,51 +201,46 @@ export default function AccountInformationPage() {
               {loginInfo && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Last Login Card */}
-                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                  <div className="p-5 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100/50 dark:border-purple-500/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <Activity size={18} className="text-white" strokeWidth={2} />
-                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                      <Activity size={18} className="text-purple-600" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#9E9E9E]">
                         Last Login
                       </span>
                     </div>
-                    <p className="font-urbanist font-bold text-[20px] text-white">
+                    <p className="font-urbanist font-bold text-[20px] text-[#181A20] dark:text-white">
                       {loginInfo.lastLogin}
                     </p>
                   </div>
 
                   {/* Device Card */}
-                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                  <div className="p-5 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100/50 dark:border-purple-500/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <Monitor size={18} className="text-white" strokeWidth={2} />
-                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                      <Monitor size={18} className="text-purple-600" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#9E9E9E]">
                         Device
                       </span>
                     </div>
-                    <p className="font-urbanist font-bold text-[20px] text-white">
+                    <p className="font-urbanist font-bold text-[20px] text-[#181A20] dark:text-white">
                       {loginInfo.device}
                     </p>
                   </div>
 
                   {/* Location Card */}
-                  <div className="p-5 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl">
+                  <div className="p-5 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100/50 dark:border-purple-500/10">
                     <div className="flex items-center gap-2 mb-2">
-                      <MapPin size={18} className="text-white" strokeWidth={2} />
-                      <span className="font-urbanist text-[12px] font-semibold text-white/90">
+                      <MapPin size={18} className="text-purple-600" strokeWidth={2} />
+                      <span className="font-urbanist text-[12px] font-semibold text-[#757575] dark:text-[#9E9E9E]">
                         Location
                       </span>
                     </div>
-                    <p className="font-urbanist font-bold text-[20px] text-white">
+                    <p className="font-urbanist font-bold text-[20px] text-[#181A20] dark:text-white">
                       {loginInfo.location}
                     </p>
                   </div>
                 </div>
               )}
             </div>
-          </main>
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+    </AccountLayout>
   )
 }

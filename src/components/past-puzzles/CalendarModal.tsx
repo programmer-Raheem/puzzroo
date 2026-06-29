@@ -8,7 +8,7 @@ import { generateDailyChallenge } from '@/lib/dailyChallenge/generator'
 interface CalendarModalProps {
   isOpen: boolean
   onClose: () => void
-  gameId: string
+  gameId: 'sudoku' | 'cross-math' | 'nonogram' | 'tangram'
   onDateSelected?: (dateString: string) => void
 }
 
@@ -95,7 +95,7 @@ export function CalendarModal({ isOpen, onClose, gameId, onDateSelected }: Calen
 
     // Otherwise, navigate to daily challenge (original behavior)
     try {
-      const puzzle = generateDailyChallenge(clickedDate, gameId as 'sudoku' | 'cross-math')
+      const puzzle = generateDailyChallenge(clickedDate, gameId)
       if (puzzle) {
         setSelectedDate(clickedDate)
         setErrorMessage('')

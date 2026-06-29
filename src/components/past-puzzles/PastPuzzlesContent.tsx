@@ -18,7 +18,7 @@ import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
 interface PastPuzzlesContentProps {
-  gameId: string
+  gameId: 'sudoku' | 'cross-math' | 'nonogram' | 'tangram'
 }
 
 export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
@@ -33,7 +33,7 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
   const { theme } = useTheme()
 
   // Format game title
-  const gameTitle = gameId === 'cross-math' ? 'CrossMath' : gameId === 'sudoku' ? 'Sudoku' : gameId === 'nonogram' ? 'Nonogram' : gameId
+  const gameTitle = gameId === 'cross-math' ? 'CrossMath' : gameId === 'sudoku' ? 'Sudoku' : gameId === 'nonogram' ? 'Nonogram' : gameId === 'tangram' ? 'Tangram' : gameId
 
   // Get game icon - theme aware for nonogram
   const gameIcon = gameId === 'cross-math' 
@@ -68,13 +68,13 @@ export function PastPuzzlesContent({ gameId }: PastPuzzlesContentProps) {
 
   // Load completed puzzles from universal completion system
   useEffect(() => {
-    const gameType = gameId === 'cross-math' ? 'crossmath' : gameId === 'sudoku' ? 'sudoku' : 'nonogram'
-    setCompletedPuzzles(getCompletedPuzzleIds(gameType as 'sudoku' | 'crossmath' | 'nonogram'))
+    const gameType = gameId === 'cross-math' ? 'crossmath' : gameId === 'sudoku' ? 'sudoku' : gameId === 'nonogram' ? 'nonogram' : 'tangram'
+    setCompletedPuzzles(getCompletedPuzzleIds(gameType))
   }, [gameId])
 
   useEffect(() => {
     // Generate 8 past puzzles
-    const generated = generatePastPuzzles(8, gameId as 'sudoku' | 'cross-math' | 'nonogram')
+    const generated = generatePastPuzzles(8, gameId)
     
     // Update status from localStorage and apply lock
     const withStatus = generated.map((puzzle, index) => {
@@ -387,7 +387,9 @@ function PuzzleCard({ puzzle, gameIcon, isLocked, isCompleted, onLockedClick, on
         ? `/cross-math?date=${puzzle.dateString}` 
         : puzzle.gameId === 'nonogram' 
           ? `/nonogram?date=${puzzle.dateString}&skipSelection=true` 
-          : '/sudoku'
+          : puzzle.gameId === 'tangram'
+            ? `/tangram?date=${puzzle.dateString}`
+            : '/sudoku'
     router.push(gameUrl)
   }
 

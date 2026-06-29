@@ -1,47 +1,14 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Navbar from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/Footer'
-import { AccountSidebar } from '@/components/account/AccountSidebar'
-import { isLoggedIn, getCurrentUser } from '@/lib/auth/frontend-auth'
+import { AccountLayout } from '@/components/account/AccountLayout'
+import { getCurrentUser } from '@/lib/auth/frontend-auth'
 import { Receipt, Calendar, CreditCard } from 'lucide-react'
 
 export default function BillingHistoryPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    
-    if (!isLoggedIn()) {
-      router.push('/login')
-      return
-    }
-
-    const userData = getCurrentUser()
-    if (userData) {
-      setUser(userData)
-    }
-  }, [router])
-
-  if (!mounted || !isLoggedIn() || !user) {
-    return null
-  }
+  const user = getCurrentUser()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300">
-      <Navbar />
-
-      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[40px] md:py-[60px]">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <AccountSidebar />
-
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+    <AccountLayout>
             {/* Header */}
             <div className="mb-8">
               <h1 className="font-urbanist font-bold text-[32px] md:text-[40px] text-[#212121] dark:text-white mb-2">
@@ -65,7 +32,7 @@ export default function BillingHistoryPage() {
                   </h3>
                 </div>
                 <p className="font-urbanist font-bold text-[28px] text-[#212121] dark:text-white capitalize">
-                  {user.subscriptionPlan}
+                  {user?.subscriptionPlan || 'Free'}
                 </p>
               </div>
 
@@ -127,11 +94,6 @@ export default function BillingHistoryPage() {
                 please contact our support team.
               </p>
             </div>
-          </main>
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+    </AccountLayout>
   )
 }

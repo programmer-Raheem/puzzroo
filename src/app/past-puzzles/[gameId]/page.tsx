@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react'
 
 export default function PastPuzzlesPage() {
   const params = useParams()
-  const gameId = params.gameId as string
+  const gameId = params.gameId as 'sudoku' | 'cross-math' | 'nonogram' | 'tangram'
 
   return (
     <Suspense fallback={

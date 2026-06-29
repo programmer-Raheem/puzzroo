@@ -16,7 +16,7 @@ interface GameCard {
 }
 
 // Active games that are fully implemented
-const ACTIVE_GAMES = ['sudoku', 'cross-math', 'nonogram']
+const ACTIVE_GAMES = ['sudoku', 'cross-math', 'nonogram', 'tangram']
 
 const gamesData: GameCard[] = [
   {
@@ -40,6 +40,13 @@ const gamesData: GameCard[] = [
     image: images.gameCards.nonogram,
     imageLight: images.gameCards.nonogramWhite,
     imageAlt: 'Nonogram Game',
+  },
+  {
+    id: 'tangram',
+    title: 'TANGRAM',
+    status: 'Unplayed',
+    image: images.gameCards.kakuro,
+    imageAlt: 'Tangram Game',
   },
   {
     id: 'kakuro',

@@ -1,11 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Navbar from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/Footer'
-import { AccountSidebar } from '@/components/account/AccountSidebar'
-import { isLoggedIn } from '@/lib/auth/frontend-auth'
+import { AccountLayout } from '@/components/account/AccountLayout'
 import { Check, Zap } from 'lucide-react'
 
 const features = [
@@ -18,36 +13,8 @@ const features = [
 ]
 
 export default function SubscriptionPage() {
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    
-    if (!isLoggedIn()) {
-      router.push('/login')
-    }
-  }, [router])
-
-  if (!mounted) {
-    return null
-  }
-
-  if (!isLoggedIn()) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300">
-      <Navbar />
-
-      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[40px] md:py-[60px]">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <AccountSidebar />
-
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+    <AccountLayout>
             {/* Hero Section */}
             <div className="text-center mb-12">
               <h1 className="font-urbanist font-bold text-[36px] md:text-[48px] text-[#212121] dark:text-white mb-4">
@@ -167,11 +134,6 @@ export default function SubscriptionPage() {
                 </p>
               </div>
             </div>
-          </main>
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+    </AccountLayout>
   )
 }

@@ -90,7 +90,7 @@ export function DifficultyTabs({
                   : 'text-[#9E9E9E] group-hover:text-[#757575]'
               }`}
             >
-              {difficulty}
+              {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
             </span>
             {/* Grey background line */}
             <div className="grey-line w-[78px] sm:w-[80px] md:w-[84px] h-[2px] bg-[#EEEEEE] rounded-full"></div>

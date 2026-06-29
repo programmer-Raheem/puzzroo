@@ -29,11 +29,11 @@ function DailyChallengeContent() {
       const [month, day, year] = dateParam.split('-')
       const fullYear = 2000 + parseInt(year)
       const date = new Date(fullYear, parseInt(month) - 1, parseInt(day))
-      const specificChallenge = generateDailyChallenge(date, gameId as 'sudoku' | 'cross-math' | 'nonogram')
+      const specificChallenge = generateDailyChallenge(date, gameId as 'sudoku' | 'cross-math' | 'nonogram' | 'tangram')
       setChallenge(specificChallenge)
     } else {
       // Get today's challenge
-      const todayChallenge = getTodayChallenge(gameId as 'sudoku' | 'cross-math' | 'nonogram')
+      const todayChallenge = getTodayChallenge(gameId as 'sudoku' | 'cross-math' | 'nonogram' | 'tangram')
       setChallenge(todayChallenge)
     }
   }, [gameId, dateParam])

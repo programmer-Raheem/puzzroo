@@ -1,11 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Navbar from '@/components/layout/navbar'
-import { Footer } from '@/components/layout/Footer'
-import { AccountSidebar } from '@/components/account/AccountSidebar'
-import { isLoggedIn } from '@/lib/auth/frontend-auth'
+import { useEffect, useState } from 'react'
+import { AccountLayout } from '@/components/account/AccountLayout'
 import { Mail, Shield, Bell, BookOpen } from 'lucide-react'
 
 interface EmailPreference {
@@ -70,54 +66,30 @@ const getIcon = (iconName: string) => {
 }
 
 export default function EmailPreferencesPage() {
-  const router = useRouter()
-  const [preferences, setPreferences] = useState<EmailPreference[]>([])
+  const [preferences, setPreferences] = useState<EmailPreference[]>(defaultPreferences)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    
-    if (!isLoggedIn()) {
-      router.push('/login')
-      return
-    }
-
-    // Load preferences from localStorage
+    // Load preferences from localStorage only on client
     const savedPreferences = localStorage.getItem('puzzroo_email_preferences')
     if (savedPreferences) {
       setPreferences(JSON.parse(savedPreferences))
-    } else {
-      setPreferences(defaultPreferences)
     }
-  }, [router])
+  }, [])
 
   const togglePreference = (id: string) => {
     const updated = preferences.map(pref =>
       pref.id === id ? { ...pref, enabled: !pref.enabled } : pref
     )
     setPreferences(updated)
-    localStorage.setItem('puzzroo_email_preferences', JSON.stringify(updated))
-  }
-
-  if (!mounted) {
-    return null
-  }
-
-  if (!isLoggedIn()) {
-    return null
+    if (mounted) {
+      localStorage.setItem('puzzroo_email_preferences', JSON.stringify(updated))
+    }
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#181A20] transition-colors duration-300">
-      <Navbar />
-
-      <div className="w-full max-w-[1380px] mx-auto px-[20px] py-[40px] md:py-[60px]">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <AccountSidebar />
-
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+    <AccountLayout>
             {/* Header */}
             <div className="mb-8">
               <h1 className="font-urbanist font-bold text-[32px] md:text-[40px] text-[#212121] dark:text-white mb-2">
@@ -183,11 +155,6 @@ export default function EmailPreferencesPage() {
                 We recommend keeping this notification enabled.
               </p>
             </div>
-          </main>
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+    </AccountLayout>
   )
 }
