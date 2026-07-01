@@ -1,22 +1,25 @@
 /**
- * Tangram Board Component - REFACTORED WITH GEOMETRY ENGINE
- * Canvas-based board with grey background, BLACK square silhouette, and black piece tray
+ * Tangram Board Component
+ * Canvas-based board with grey background, puzzle silhouette, and black piece tray
  */
 
 'use client'
 
 import React, { useRef, useEffect } from 'react'
-import { TARGET_SQUARE_SIZE } from '@/lib/tangram/pieceConfig'
+import {
+  BOARD_VIRTUAL_HEIGHT,
+  BOARD_VIRTUAL_WIDTH,
+  TRAY_TOP,
+} from '@/lib/tangram/boardConfig'
 
 interface TangramBoardProps {
   children: React.ReactNode
   mobile?: boolean
+  silhouette?: string // SVG path data for the puzzle shape
 }
 
-export function TangramBoard({ children, mobile = false }: TangramBoardProps) {
+export function TangramBoard({ children, mobile = false, silhouette }: TangramBoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const VIRTUAL_WIDTH = 750
-  const VIRTUAL_HEIGHT = 700
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -25,41 +28,42 @@ export function TangramBoard({ children, mobile = false }: TangramBoardProps) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Grey background for entire canvas
-    ctx.fillStyle = '#71717A'
-    ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+    // Dark grey background for entire canvas (#353535)
+    ctx.fillStyle = '#353535'
+    ctx.fillRect(0, 0, BOARD_VIRTUAL_WIDTH, BOARD_VIRTUAL_HEIGHT)
 
-    // Silhouette area (top part)
-    const silhouetteHeight = 400
-
-    // Hidden BLACK square silhouette - matches total piece area (~283×283px)
-    const shapeSize = Math.round(TARGET_SQUARE_SIZE)
-    const centerX = VIRTUAL_WIDTH / 2 - shapeSize / 2
-    const centerY = (silhouetteHeight / 2 - shapeSize / 2) * 0.9 // 10% upward shift
-
-    // Draw BLACK silhouette (15% opacity)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'
-    ctx.fillRect(centerX, centerY, shapeSize, shapeSize)
+    // Draw puzzle silhouette (#222222) — absolute board coordinates, no translate needed
+    if (silhouette) {
+      ctx.save()
+      ctx.fillStyle = '#222222'
+      const path = new Path2D(silhouette)
+      ctx.fill(path)
+      ctx.restore()
+    }
 
     // Black tray area (bottom part)
-    const trayTop = silhouetteHeight
-    const trayHeight = VIRTUAL_HEIGHT - silhouetteHeight
     ctx.fillStyle = '#000000'
-    ctx.fillRect(0, trayTop, VIRTUAL_WIDTH, trayHeight)
-  }, [])
+    ctx.fillRect(0, TRAY_TOP, BOARD_VIRTUAL_WIDTH, BOARD_VIRTUAL_HEIGHT - TRAY_TOP)
+  }, [silhouette])
 
   return (
-    <div className="relative w-full max-w-[450px] md:max-w-[600px] aspect-[750/700] tangram-board-container mx-auto">
+    <div
+      className={`relative tangram-board-container overflow-visible ${
+        mobile
+          ? 'w-full max-w-[450px] mx-auto aspect-[750/493]'
+          : 'w-[700px] h-[460px] shrink-0'
+      }`}
+    >
       <canvas
         ref={canvasRef}
-        width={VIRTUAL_WIDTH}
-        height={VIRTUAL_HEIGHT}
-        className="w-full h-full block rounded-[5px] border-2 border-[#CDCDCD]"
+        width={BOARD_VIRTUAL_WIDTH}
+        height={BOARD_VIRTUAL_HEIGHT}
+        className="w-full h-full block rounded-[5px]"
       />
 
       {/* Pieces overlay on canvas */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="relative w-full h-full pointer-events-auto">
+      <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="relative w-full h-full pointer-events-auto overflow-visible">
           {children}
         </div>
       </div>

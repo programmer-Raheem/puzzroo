@@ -12,6 +12,8 @@ import { CrossMathGame } from '@/components/crossmath/CrossMathGame'
 import { CrossMathHero } from '@/components/crossmath/CrossMathHero'
 import { NonogramGame } from '@/components/nonogram/NonogramGame'
 import { NonogramHero } from '@/components/nonogram/NonogramHero'
+import { TangramGame } from '@/components/tangram/TangramGame'
+import { TangramHero } from '@/components/tangram/TangramHero'
 import Navbar from '@/components/layout/navbar'
 import Footer from '@/components/layout/Footer'
 
@@ -67,6 +69,11 @@ function DailyChallengeContent() {
             <>
               <NonogramHero backTo="/#free-games" />
               <NonogramGame />
+            </>
+          ) : gameId === 'tangram' ? (
+            <>
+              <TangramHero />
+              <TangramGame />
             </>
           ) : (
             <div className="flex items-center justify-center min-h-[400px]">

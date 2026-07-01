@@ -1,6 +1,6 @@
 /**
- * Tangram Game Hook - REFACTORED WITH GEOMETRY ENGINE
- * Manages game state, piece movement, rotation, and game logic
+ * Tangram Game Hook
+ * Phase 3: Countdown timer, Hints, Scoring, Puzzle loading
  */
 
 'use client'
@@ -11,9 +11,11 @@ import {
   TangramPieceType,
   GameStatus,
 } from '@/types/tangram'
-import { validatePuzzle, getSolvedSquarePositions } from '@/lib/tangram/validation'
-import { markPuzzleCompleted } from '@/lib/completion/universal'
+import { TangramPuzzle, TangramDifficulty, MAX_HINTS } from '@/types/tangram-puzzle'
+import { validatePuzzle, getSolvedPositions } from '@/lib/tangram/validation'
 import { TRAY_LAYOUT } from '@/lib/tangram/trayLayout'
+import { getRandomPuzzle } from '@/data/tangram'
+import { saveCompletedPuzzle } from '@/data/tangram/past-puzzles'
 
 // Initial pieces using canonical tray positions
 const INITIAL_PIECES: TangramPiece[] = [
@@ -75,21 +77,32 @@ const INITIAL_PIECES: TangramPiece[] = [
   },
 ]
 
-export function useTangram() {
+interface UseTangramOptions {
+  difficulty?: TangramDifficulty
+  puzzleId?: string
+}
+
+export function useTangram(options: UseTangramOptions = {}) {
+  const { difficulty = 'easy' } = options
+  
+  // Load initial puzzle
+  const [currentPuzzle, setCurrentPuzzle] = useState<TangramPuzzle | null>(() => {
+    return getRandomPuzzle(difficulty)
+  })
+  
   const [pieces, setPieces] = useState<TangramPiece[]>(INITIAL_PIECES)
   const [selectedPiece, setSelectedPiece] = useState<TangramPieceType | null>(null)
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing')
-  const [time, setTime] = useState(0)
+  const [timeRemaining, setTimeRemaining] = useState(currentPuzzle?.timeLimit || 120)
   const [score, setScore] = useState(0)
-  const [mistakes, setMistakes] = useState(0)
   const [hintsUsed, setHintsUsed] = useState(0)
-  const [availableHints, setAvailableHints] = useState(3)
+  const [hintPiece, setHintPiece] = useState<TangramPieceType | null>(null)
   const [isSolved, setIsSolved] = useState(false)
   
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const isAutoFilling = useRef(false)
 
-  // Timer
+  // Countdown Timer (Phase 3 requirement)
   useEffect(() => {
     if (gameStatus !== 'playing') {
       if (timerRef.current) {
@@ -100,7 +113,14 @@ export function useTangram() {
     }
 
     timerRef.current = setInterval(() => {
-      setTime((t) => t + 1)
+      setTimeRemaining((t) => {
+        if (t <= 1) {
+          // Time's up!
+          setGameStatus('lost')
+          return 0
+        }
+        return t - 1
+      })
     }, 1000)
 
     return () => {
@@ -115,7 +135,7 @@ export function useTangram() {
   useEffect(() => {
     if (gameStatus !== 'playing') return
     
-    const validation = validatePuzzle(pieces)
+    const validation = validatePuzzle(pieces, currentPuzzle?.solution)
     
     if (validation.isSolved && !isSolved) {
       if (isAutoFilling.current) {
@@ -134,18 +154,23 @@ export function useTangram() {
     setIsSolved(true)
     setGameStatus('won')
     
-    // Calculate final score: 1000 - seconds - (mistakes * 25) - (hints * 50)
-    const finalScore = Math.max(0, 1000 - time - (mistakes * 25) - (hintsUsed * 50))
+    // Phase 3 Scoring: score = 1000 + remainingSeconds*5 - (hintsUsed*100)
+    const finalScore = Math.max(0, 1000 + timeRemaining * 5 - hintsUsed * 100)
     setScore(finalScore)
     
-    // Mark puzzle as completed in localStorage
-    markPuzzleCompleted('tangram', 'square-puzzle', {
-      time,
-      hintsUsed,
-      score: finalScore,
-      difficulty: 'medium',
-    })
-  }, [time, mistakes, hintsUsed])
+    // Save to past puzzles
+    if (currentPuzzle) {
+      saveCompletedPuzzle({
+        id: currentPuzzle.id,
+        title: currentPuzzle.title,
+        difficulty: currentPuzzle.difficulty,
+        score: finalScore,
+        remainingTime: timeRemaining,
+        completedAt: new Date().toISOString(),
+        hintsUsed,
+      })
+    }
+  }, [timeRemaining, hintsUsed, currentPuzzle])
 
   // Select piece
   const selectPiece = useCallback((pieceId: TangramPieceType) => {
@@ -219,7 +244,7 @@ export function useTangram() {
     )
   }, [])
 
-  // Undo last move - restore piece to tray position
+  // Undo move
   const undoMove = useCallback(() => {
     if (selectedPiece) {
       setPieces((prevPieces) =>
@@ -228,28 +253,35 @@ export function useTangram() {
             ? { 
                 ...piece, 
                 isPlaced: false, 
-                position: { ...piece.trayPosition } // Restore to original tray position
+                position: { ...piece.trayPosition }
               }
             : piece
         )
       )
-      setMistakes((m) => m + 1)
     }
   }, [selectedPiece])
 
-  // Request hint
+  // Request hint (Phase 3: Ghost piece system)
   const requestHint = useCallback(() => {
-    if (availableHints > 0) {
-      setAvailableHints((h) => h - 1)
-      setHintsUsed((h) => h + 1)
-      setScore((s) => Math.max(0, s - 10))
-      // TODO: Implement hint logic (show correct position briefly)
-    }
-  }, [availableHints])
+    if (hintsUsed >= MAX_HINTS || !currentPuzzle) return
+    
+    // Find first unplaced piece
+    const unplacedPiece = pieces.find(p => !p.isPlaced)
+    if (!unplacedPiece) return
+    
+    setHintsUsed((h) => h + 1)
+    setHintPiece(unplacedPiece.type)
+    
+    // Clear hint after 5 seconds
+    setTimeout(() => {
+      setHintPiece(null)
+    }, 5000)
+  }, [hintsUsed, pieces, currentPuzzle])
 
   // Auto Fill (Development Only)
   const autoFill = useCallback(() => {
-    const solvedPositions = getSolvedSquarePositions()
+    if (!currentPuzzle) return
+    const solvedPositions = getSolvedPositions(currentPuzzle.solution)
     isAutoFilling.current = true
     
     setPieces((prevPieces) =>
@@ -270,36 +302,45 @@ export function useTangram() {
     setTimeout(() => {
       isAutoFilling.current = false
     }, 1500)
-  }, [])
+  }, [currentPuzzle])
 
   // Reset game
   const resetGame = useCallback(() => {
     setPieces(INITIAL_PIECES)
     setSelectedPiece(null)
     setGameStatus('playing')
-    setTime(0)
+    setTimeRemaining(currentPuzzle?.timeLimit || 120)
     setScore(0)
-    setMistakes(0)
     setHintsUsed(0)
-    setAvailableHints(3)
+    setHintPiece(null)
     setIsSolved(false)
-  }, [])
+  }, [currentPuzzle])
 
-  // New game
+  // New game (loads another puzzle from same difficulty)
   const newGame = useCallback(() => {
-    resetGame()
-  }, [resetGame])
+    const newPuzzle = getRandomPuzzle(difficulty)
+    setCurrentPuzzle(newPuzzle)
+    setPieces(INITIAL_PIECES)
+    setSelectedPiece(null)
+    setGameStatus('playing')
+    setTimeRemaining(newPuzzle?.timeLimit || 120)
+    setScore(0)
+    setHintsUsed(0)
+    setHintPiece(null)
+    setIsSolved(false)
+  }, [difficulty])
 
   return {
     pieces,
     selectedPiece,
     gameStatus,
-    time,
+    timeRemaining,
     score,
-    mistakes,
     hintsUsed,
-    availableHints,
+    hintPiece,
+    availableHints: MAX_HINTS - hintsUsed,
     isSolved,
+    currentPuzzle,
     selectPiece,
     deselectPiece,
     movePiece,

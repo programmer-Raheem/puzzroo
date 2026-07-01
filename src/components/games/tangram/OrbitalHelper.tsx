@@ -138,7 +138,7 @@ export function OrbitalHelper({ x, y, show, onRotateLeft, onRotateRight, rotatio
         top: typeof y === 'number' ? `${y}px` : y,
         transform: 'translate(-50%, -50%)',
         pointerEvents: 'none',
-        zIndex: 100,
+        zIndex: 9999,
       }}
     >
       {/* Fixed orbital ring - does NOT rotate */}

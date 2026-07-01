@@ -1,7 +1,6 @@
   /**
    * Tangram Completion Modal
-   * Shows when puzzle is completed
-   * Reuses Puzzroo modal pattern from Sudoku
+   * Phase 3: Shows when puzzle is completed or time's up
    */
 
   'use client'
@@ -14,7 +13,11 @@
     mistakes: number
     hintsUsed: number
     score: number
+    difficulty?: string
+    timeRemaining?: number
+    isTimeUp?: boolean
     onPlayAgain: () => void
+    onNewPuzzle?: () => void
     onBackToLobby?: () => void
   }
 
@@ -24,7 +27,11 @@
     mistakes,
     hintsUsed,
     score,
+    difficulty = 'easy',
+    timeRemaining = 0,
+    isTimeUp = false,
     onPlayAgain,
+    onNewPuzzle,
     onBackToLobby,
   }: TangramModalProps) {
     // Handle ESC key
@@ -69,71 +76,96 @@
             aria-modal="true"
             aria-labelledby="modal-title"
           >
-            {/* Win Modal Content */}
+            {/* Modal Content */}
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-6xl mb-4">{isTimeUp ? '⏰' : '🎉'}</div>
               <h2
                 id="modal-title"
                 className="font-urbanist text-3xl font-bold text-[#212121] dark:text-white mb-2"
               >
-                Puzzle Complete!
+                {isTimeUp ? "Time's Up!" : 'Puzzle Complete!'}
               </h2>
               <p className="font-urbanist text-[#424242] dark:text-[#E0E0E0] text-lg">
-                Congratulations! You successfully completed the Tangram puzzle.
+                {isTimeUp
+                  ? 'The countdown reached zero. Try again!'
+                  : 'Congratulations! You successfully completed the Tangram puzzle.'}
               </p>
             </div>
 
             {/* Stats */}
-            <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl p-4 mb-6 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
-                  Final Time
-                </span>
-                <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
-                  {formatTime(time)}
-                </span>
+            {!isTimeUp && (
+              <div className="bg-[#F0EDFF] dark:bg-[#35383F] rounded-xl p-4 mb-6 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Difficulty
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg capitalize">
+                    {difficulty}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Time Remaining
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
+                    {formatTime(timeRemaining)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Hints Used
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
+                    {hintsUsed}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
+                    Final Score
+                  </span>
+                  <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
+                    {score}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
-                  Mistakes
-                </span>
-                <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
-                  {mistakes}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
-                  Hints Used
-                </span>
-                <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
-                  {hintsUsed}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-urbanist text-[#424242] dark:text-[#E0E0E0] font-medium">
-                  Final Score
-                </span>
-                <span className="font-urbanist text-[var(--color-primary)] font-bold text-lg">
-                  {score}
-                </span>
-              </div>
-            </div>
+            )}
 
             {/* Buttons */}
             <div className="flex flex-col gap-3">
-              <button
-                onClick={onPlayAgain}
-                className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
-              >
-                Play Again
-              </button>
-              {onBackToLobby && (
-                <button
-                  onClick={onBackToLobby}
-                  className="w-full h-[46px] rounded-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[#F0EDFF] dark:hover:bg-[#35383F] font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
-                >
-                  Back to Lobby
-                </button>
+              {isTimeUp ? (
+                <>
+                  <button
+                    onClick={onPlayAgain}
+                    className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+                  >
+                    Retry
+                  </button>
+                  {onNewPuzzle && (
+                    <button
+                      onClick={onNewPuzzle}
+                      className="w-full h-[46px] rounded-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[#F0EDFF] dark:hover:bg-[#35383F] font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+                    >
+                      New Puzzle
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={onPlayAgain}
+                    className="w-full h-[46px] rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+                  >
+                    Play Again
+                  </button>
+                  {onBackToLobby && (
+                    <button
+                      onClick={onBackToLobby}
+                      className="w-full h-[46px] rounded-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[#F0EDFF] dark:hover:bg-[#35383F] font-urbanist font-bold text-[16px] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2"
+                    >
+                      Back to Lobby
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

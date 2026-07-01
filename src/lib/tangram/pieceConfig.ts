@@ -12,7 +12,8 @@
  * - Parallelogram: sides = 1 unit & √2 units, area = 1 unit²
  */
 
-export const UNIT = 70.7 // Base unit for 200×200px square
+export const PIECE_SCALE = 0.75 // Centralized scale factor (25% reduction) — ensures tall shapes fit
+export const UNIT = 70.7 * PIECE_SCALE // Base unit for 200×200px square (scaled)
 
 /**
  * Standard Tangram piece definitions
@@ -87,7 +88,7 @@ export const TOTAL_AREA = Object.values(PIECE_CONFIG).reduce((sum, piece) => sum
  * Calculate target square dimensions
  * For standard Tangram: should be 200×200px
  */
-export const TARGET_SQUARE_SIZE = 200 // Standard Tangram square
+export const TARGET_SQUARE_SIZE = 200 * PIECE_SCALE // Standard Tangram square (scaled)
 
 /**
  * Valid rotation angles (in degrees)

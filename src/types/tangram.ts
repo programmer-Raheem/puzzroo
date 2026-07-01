@@ -35,7 +35,7 @@ export interface TangramPuzzle {
   solution: Record<TangramPieceType, TangramPiecePosition>
 }
 
-export type GameStatus = 'playing' | 'won' | 'paused'
+export type GameStatus = 'playing' | 'won' | 'paused' | 'lost'
 
 export interface TangramGameState {
   pieces: TangramPiece[]

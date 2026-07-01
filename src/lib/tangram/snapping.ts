@@ -6,21 +6,15 @@
  *  2. Piece-to-piece vertex/edge snapping
  *  3. Square-edge boundary snapping
  *
- * All coordinates are in the 750×700 virtual board space.
+ * All coordinates are in the 750×493 virtual board space.
  */
 
 import { UNIT, PIECE_CONFIG } from './pieceConfig'
 import { TangramPiece } from '@/types/tangram'
+import { SQUARE_BOTTOM, SQUARE_LEFT, SQUARE_RIGHT, SQUARE_TOP } from './boardConfig'
 
-// ── Square silhouette geometry (must match TangramBoard.tsx) ─────────────────
-const BOARD_WIDTH = 750
-const SILHOUETTE_HEIGHT = 400
-const SQUARE_SIZE = 200
-
-export const SQUARE_LEFT   = BOARD_WIDTH / 2 - SQUARE_SIZE / 2                         // 275
-export const SQUARE_TOP    = (SILHOUETTE_HEIGHT / 2 - SQUARE_SIZE / 2) * 0.9           // 90
-export const SQUARE_RIGHT  = SQUARE_LEFT + SQUARE_SIZE                                  // 475
-export const SQUARE_BOTTOM = SQUARE_TOP + SQUARE_SIZE                                   // 290
+// Re-export for consumers that imported from snapping.ts
+export { SQUARE_LEFT, SQUARE_TOP, SQUARE_RIGHT, SQUARE_BOTTOM }
 
 // ── Thresholds ──────────────────────────────────────────────────────────────
 const EDGE_SNAP_THRESHOLD     = 25   // px — snap piece edge to square boundary
